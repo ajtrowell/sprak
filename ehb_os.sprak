@@ -392,11 +392,14 @@ void listComputers()
     string serverName = "HanksSteeringComputer"
     string code = "!c_"
     var memKeys
+    number i = 0
     if (Name() == serverName)
         memKeys = GetMemories()
         loop x in memKeys
             if hasPrefix(x,code)
+                PrintS(i +"-")
                 Print(removePrefix(x,3) + " ... " + LoadMemory(x) )
+                i++
             end
         end
         Print("EOF")
@@ -405,7 +408,9 @@ void listComputers()
         memKeys = conID.GetMemories()
         loop x in memKeys
             if hasPrefix(x,code)
+                Print(i +"-")
                 Print(removePrefix(x,3) + " ... " + conID.LoadMemory(x) )
+                i++
             end
         end        
         Print("EOF")        
