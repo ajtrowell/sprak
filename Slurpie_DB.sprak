@@ -1,0 +1,58 @@
+######## Slurpie DB, the server-side program #############
+
+####### AssertFunc()
+# Ensure needed function is there or bomb out:
+void AssertFunc( string fName )
+    if HasFunction(fName)
+        #good
+    else
+        string msg = "Error: This computer can't"
+        msg += " do the "+fName+"() function."
+        msg += " Run it on one that can."
+        Say(msg)
+        Quit()
+    end
+end
+AssertFunc("GetMemories")
+AssertFunc("LoadMemory")
+AssertFunc("SaveMemory")
+AssertFunc("Connect")
+AssertFunc("Input")
+
+ClearText()
+
+
+Print(Name())
+var keys = GetMemories()
+loop
+    Print("")
+    Print("Slurpie DB.")
+    Print("")
+    Print("Currently knows " + (Count(keys)) + " hosts.")
+    Print("")
+    if Count(keys) > 0
+        var max = Count(keys)
+        max = max - 1 # why can't I do Count(keys)-1?
+        number i = Input("host [0.."+max+"] : ")
+        if i < 0 or i >= Count(keys)
+            Print("out of range")
+        else
+            Print(keys[ i ])
+            Print("  With Nickname " + LoadMemory(keys[ i ]))
+            string c = Input("(S)lurp, (D)elete, or (N)either? ")
+            if c == "s" or c == "S"
+                Connect(keys[ i ])
+                Slurp()
+            else if c == "d" or c == "D"
+                string yn = Input("Confirm? (y/n) ")
+                if yn == "y" or yn == "Y"
+                    EraseMemory( keys[ i ] )
+                    keys = GetMemories() #list is smaller now
+                end
+            end
+        end
+    else
+        break # don't keep looping the message if input is
+             # being skipped.
+    end
+end

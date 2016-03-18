@@ -1,0 +1,280 @@
+########### Slurpie DB, the client-side floppy #############
+
+
+########
+########
+######## EDIT THIS SETTING:
+########
+########
+# Change to the name of the computer where you
+# installed the Slurpie DB server program:
+string slurpieDB = "Lodge_Underwater_MediumSewerComputer_MediumSewerComputer_1"
+
+# Note: the following aren't used but I left them in for
+# use in the future if Height() and Width() ever get fixed.
+#
+# Maybe edit these some times?  I think everything
+# uses the same universal font but I'm not sure:
+number fontHeight = 10
+number fontWidth = 8
+
+#  There should be no edits required past this line
+# -----------------------------------------------------
+
+####### AssertFunc()
+# Ensure needed function is there or bomb out:
+void AssertFunc( string fName )
+    if HasFunction( fName )
+        #good
+    else
+        string msg = "Error: This computer can't"
+        msg += " do the "+fName+"() function."
+        msg += " Run it on one that can."
+        Say( msg )
+        Quit()
+    end
+end
+AssertFunc( "Name" )
+AssertFunc( "Connect" )
+AssertFunc( "Slurp" )
+AssertFunc( "HasFloppy" )
+AssertFunc( "Input" )
+AssertFunc( "GetUser" )
+AssertFunc( "Height" )
+AssertFunc( "Width" )
+
+########## GetNumDisplayRows
+# A workaround to get the screen height in rows
+# from the user looking at the screen, since
+# Height() appears to be hardcoded to 256 regardless
+# of screen size in version 1.0.6 of Heart.Break(),
+# and there's no way to calculate it:
+number GetNumDisplayRows()
+    ClearText()
+    loop i from 35 to 4
+        Print(i)
+    end
+    Print("3 Screen height query:")
+    Print("2 What is the biggest")
+    PrintS("1 number you see?")
+    number n = Input(" ")
+    ClearText()
+    return n
+end
+
+########## PickMenu()
+# 
+# This function is more complex than I wanted, and I
+# should probably break it up into smaller functions
+# at some point now that I got it working.
+#
+# Returns a number for how far into
+# the PickMenu the choice was.  Returns
+# -1 if the user quits.
+#
+number PickMenu( string title, var picks )
+
+    # These aren't actually usable at the moment,
+    # because Width() and Height() just return the same
+    # thing all the time, so these values aren't being
+    # used yet:
+    number textHeight = Int(Height() / fontHeight)
+    number textWidth = Int(Width() / fontWidth)
+
+    number pick = -1
+    number topIndex = 0
+    number max = Count(picks)
+    max -= 1 # needs to be an extra step because Count() does
+             # not like being used in an expression in Sprak.
+    number topDisplayRow = 1
+    number numDisplayRows = GetNumDisplayRows() - 1
+    if numDisplayRows < 1
+        numDisplayRows = 1
+    end
+    number pickDisplayRow = 1 + Int(numDisplayRows / 2)
+
+    # Ensure keypress is released from whatever prev
+    # thing was happening. to avoid "bounceback"         
+    loop
+        if IsKeyPressed("space")
+            #continue
+        else
+            break
+        end
+    end
+
+    ClearText()
+    
+    bool picked = false
+    loop
+        # ----- Redraw display, only if pick is
+        # ----- outside currently showing choices:
+        # ----- (causes new screenful when arrowing
+        # ----- past the ends of the shown sublist.)
+        if pick < topIndex or pick >= topIndex + numDisplayRows
+            if pick < topIndex
+                topIndex = (pick - numDisplayRows) + 1
+                if topIndex < -1
+                    topIndex = -1
+                    pick = -1
+                end
+            end
+            if pick >= topIndex + numDisplayRows
+                topIndex = pick
+            end
+            ClearText()
+            Print(" ") # forces all graphic primitives erased
+            Text(0,0,title+": ")
+            PrintMenuSubset( slurpie, pick, picks, topIndex, topDisplayRow, numDisplayRows)
+        end
+        
+        # ---- Draw where the pick is now:
+        Text(0,topDisplayRow + (pick - topIndex), "->")
+        number oldPick = pick
+        DisplayGraphics()
+
+        # ---- Move the pick on arrows, or accept current
+        bool keyPressed = false
+        loop
+            if IsKeyPressed("up")
+                pick -= 1
+                if pick < -1
+                    pick = -1
+                end
+                keyPressed = true
+            end
+            if IsKeyPressed("down")
+                pick += 1
+                if pick > max
+                    pick = max
+                end
+                keyPressed = true
+            end
+            if IsKeyPressed("space")
+                picked = true
+                keyPressed = true
+            end
+            Sleep(0.1) # just to prevent busy loop
+            if keyPressed
+                break
+            end
+        end
+        if picked
+            break
+        else
+            # pick has moved, so erase where it was before
+            Text(0,topDisplayRow + (oldPick - topIndex), "  ")
+        end
+    end
+    return pick
+end
+
+####### PrintMenuSubset
+void PrintMenuSubset( var slurpie, number pick, var picks, number topIndex, number topDisplayRow, number numDisplayRows)
+    number nMinusOne = numDisplayRows - 1 #workaround Sprak bug
+    loop row from 0 to nMinusOne
+        number i = row + topIndex
+        number screenRow = topDisplayRow + row
+
+        if HasIndex(picks,i)
+            string str = "["+i+"] " + picks[ i ]
+            Text(2, screenRow, str)
+        else if i == -1
+            Text(2, screenRow, "<<quit>>")
+        end
+
+    end
+end
+
+######## BuildNicks
+var BuildNicks( var slurpie, var hosts )
+    var nicks = []
+    loop key in hosts
+        Append( nicks, slurpie.LoadMemory(key) )
+    end
+    return nicks
+end
+
+
+#############
+### MAIN  ###
+#############
+
+ClearText()
+DisplayGraphics()
+DisplayGraphics()
+Print( "My Name is..." )
+Print( "  " + Name() )
+
+Print( "Connecting to slurpieDB..." )
+var slurpie = Connect( slurpieDB )
+
+var hosts = slurpie.GetMemories()
+bool exists = slurpie.HasMemory(Name())
+string oldNick = ""
+
+if exists
+    oldNick = slurpie.LoadMemory(Name())
+    Print( "Already in DB as: " )
+    Print( "   " + oldNick )
+end
+Print( "New nickname for this Machine..." )
+if exists
+    Print( "Or hit return to keep nickname." )
+end
+string nick = ""
+loop
+    nick = Input( ">" )
+    if nick == "" and exists == false
+        # nothing - repeat loop
+    else
+        break
+    end
+end
+
+if nick == ""
+    #nothing - can't find the 'not' operator. grr.
+else
+    Print( "Adding my name to slurpieDB..." )
+    slurpie.SaveMemory( Name(), nick )
+
+    # Re-obtain hosts because the list has just changed:
+    hosts = slurpie.GetMemories()
+end
+
+var hostCount = Count( hosts )
+
+Print( "slurpieDB now has " + hostCount + " hosts." )
+
+# Ensure flushed input:
+loop
+    if IsKeyPressed("space") 
+        # loop until this is false
+    else
+        break
+    end
+end
+
+string yes_no = Input( "Do you wish to Slurp Now (y/n)? " )
+
+var nicks = BuildNicks( slurpie, hosts )
+DisconnectAll() # ensure only dest will be connected
+
+if yes_no == "y" or yes_no == "Y"
+    number pick = PickMenu( "Choose destination:", nicks )
+    if pick >= 0
+        Print( "Connecting to:" )
+        Print( "  " + hosts[ pick ] )
+        var dest = Connect( hosts[ pick ] )
+        Slurp()
+    end
+end
+Print( "Program done." )
+
+################################################################
+
+# To add this console-less computer to the slurpie DB under a nickname:
+#
+#string slurpieDB = "whatever machine name you used for the server above"
+#var c = Connect(slurpieDB)
+#c.SaveMemory(Name(), "some nickname here") # now it's in the slurpie DB

@@ -1,0 +1,551 @@
+string gcServer = "HanksSteeringComputer"
+
+#loadConnections()
+
+os()
+
+####
+
+void os()
+PlaySound("Coin 1")
+Bar()
+Print("Aniara OS v 3.5.0.1")
+Print("* * * * * * * * * *")
+Print("(C) J.L. et al, 1992 - now")
+Print("Released under The GNU")
+Print("General Public License v3.0")
+Bar()
+
+loop
+    string cmd = Input("> ")
+    string dir = "root"
+    number id = -1
+
+    if cmd == "cd"
+        Print("ROOT")
+    else if cmd == "h" or cmd == "help"
+        Print("Available commands:")
+        Print(" - connect")
+        Print(" - store")
+        Print(" - restore")
+        Print(" - list")
+        Print(" - delete")        
+        Print(" - remoteCall")
+        Print(" - computers")        
+        Print(" - door - or use magicDoor()")
+        Print(" - bank")        
+        Print(" - encrypt")        
+        Print(" - info")        
+        Print(" - clear")
+        Print(" - find - Find entities")
+        Print(" - floppy")                
+        Print(" - slurp")                
+    else if cmd == "connect"
+        string connectionName = Input("Name: ")
+        id = Connect(connectionName)
+    else if cmd == "store"
+        string key = Input("Key: ")
+        string data = Input("Data: ")
+        SaveMemory(key, data)
+        Print("Data was saved.")
+    else if cmd == "restore"
+        string key = Input("Key: ")
+        Print(LoadMemory(key))
+    else if cmd == "list"
+        var memories = GetMemories()
+        Print("Memories stored: " + Count(memories))
+        loop x in memories
+            Print(x + " ..... " + LoadMemory(x) )
+        end
+    else if cmd == "delete"
+        Print("Enter the memory key to delete: ")
+        var delete_key = Input("...")
+        EraseMemory(delete_key)
+        Print(delete_key + " has been deleted.")        
+    else if cmd == "remoteCall"
+        string fnName = Input("Function name: ")
+        RemoteFunctionCall(id, fnName, [])
+    else if cmd == "computers"
+        listComputers()
+        Print("")
+        Print("Enter computer nickname(key)")
+        var nickname = Input(": ")
+        Print("Enter computer name")
+        var pcName = Input(": ")
+        storeComputer(nickname,pcName)
+    else if cmd == "door"
+         doorUI()
+    else if cmd == "bank"
+         BankUI()
+    else if cmd == "encrypt"
+         EncryptUI()         
+    else if cmd == "info"
+         Info()  
+    else if cmd == "clear"
+         ClearText()
+     else if cmd == "find"
+         findUI()
+    else if cmd == "floppy"
+        BootFromFloppy()
+    else if cmd == "slurp"
+         SlurpUI()
+    else
+        Print("Can't understand command " + cmd)
+        Print("Enter h for help.")
+    end
+    Sleep(1)
+end
+end #os() function
+
+
+void Bar()
+    Print("===================")
+end
+
+
+
+########################################################
+
+void doorUI()
+    Print("")
+    Print("*******************")
+    listDoors()
+    Print("Enter target door: ")
+    var target = Input("")
+    openDoor(target)
+end
+
+bool openDoor(string target)
+   var id = Connect(target)
+    if id < 0
+        Print("Failed to connect")
+        return false
+    else    
+        loop x from 0 to 99999
+            if IsKeyPressed("up")
+                Bar()
+                break
+            end
+            Print("Trying code: " + x)
+            var success = id.Unlock(x)
+            if success
+                Print("Unlocked!")
+                Print("*******************")
+                storeDoor(target,x)
+                break
+            end
+        end
+    end    
+end
+
+########################################################
+
+void FloppyReader()
+    ClearText()
+    DisplayGraphics()
+    Info()
+    Print("Floppy data reader")
+    Print("==================")
+    Sleep(1)
+
+    if HasFloppy()
+        Print("")
+        Print("Data on floppy:")
+        Print("")
+        var allData = LoadData()
+        loop data in allData
+            Print(data)
+            Sleep(0.75)
+        end
+        Print("--------------")
+    else
+        Print("Please insert floppy...")
+    end
+end
+
+
+########################################################
+
+
+void Ping(string name)
+    var id = Connect(name)
+    id.Ping()
+end
+
+# Does this computer even have a monitor?! // Typo1337
+#var n = Input("Ping computer with name: ")
+#Ping(n)
+
+#####
+
+void BankUI()
+#ClearText()
+Print("*****************")
+
+var bank = Connect("FinanceComputer")
+var user = Input("User: (blank for self) ")
+    if user==""
+        user = GetUser()
+    else if user == "list"
+        #list all bank accounts
+        var keys = bank.GetMemories()
+        Print("Hold spacebar to advance list")
+        Print("Bank Memories: " + Count(keys) )
+        loop x in keys
+            Print(x + " has " + bank.LoadMemory(x) )
+            loop
+                if IsKeyPressed('space')
+                Sleep(0.1)
+                break
+                end
+            end
+        end
+    end
+    number balance = bank.GetBalanceForPerson(user)
+    Print("Current Balance for " + user + " is : $" + balance)    
+    Print("")
+    
+var amount = Input("Transfer Amount ($):")
+bank.ChangeBalance(user, amount)
+
+Print("Transaction completed.")
+Print("*****************")
+Print("")
+end        
+
+##########################################
+
+void ShowThing()
+    Color(1,1,0)
+    Line(300,0,300,600)
+    DisplayGraphics()
+end
+
+number Circle(number radius)
+    return radius * radius * 31.4159
+end
+
+
+void CircleUI()
+   number radius = Input("Enter Circle Radius: ")
+   Print("Circle Area = " + Circle(radius)  ) 
+   Sleep(4)
+end
+
+void EncryptUI()
+   ClearText()
+
+string s = Input("Enter key: ")
+number k = CharToInt(s[0])
+
+Print("Enter message:")
+string message = Input("")
+
+string encrypted = ""
+
+loop c in message
+    if c == " "
+        encrypted += " "
+    else
+        var sum = Mod(k + CharToInt(c), 26)
+        #Print("sum for " + c + " = " + sum)
+
+        var c2 = IntToChar(sum)
+        encrypted += c2
+    end
+end
+
+Print("Encrypted:")
+Print("------------")
+Print(encrypted)
+Print("------------")
+Sleep(4)
+    
+end
+
+##########################################
+# String functions
+string substring(inString,start_index,stop_index)
+    if stop_index == -1  #go to end
+        stop_index = Count(inString) - 1
+    end
+
+    #Error Checking 
+    
+    if (start_index >= stop_index)
+        Print("ERROR: start_index >= stop_index!")
+        break
+    else if (stop_index >= Count(inString) )
+        Print("ERROR: stop_index larger than string!")
+        break
+    end
+    #Generate substring
+    string outString = ""
+    loop x from start_index to stop_index
+        outString= outString + inString[x]
+    end
+    return outString
+end
+
+bool hasPrefix(inString,prefix)
+    number sizePrefix = Count(prefix) - 1
+    string test_prefix = substring(inString,0,sizePrefix)
+    return test_prefix == prefix
+end
+
+string removePrefix(inString,prefix_size)
+    return substring(inString,prefix_size,-1)
+end
+
+
+string repeatString(inString,n_repeats)
+    string outString = ""
+    loop x from 1 to n_repeats
+        outString = outString + inString
+    end
+    return outString
+end
+
+# stringDelimiter
+
+
+##########################################
+# Database Functions
+bool storeDoor(doorName,doorCode)
+# before storing the door name, verify 
+# that it can be connected to it. If not, 
+# return bool = false.
+# Also, doorCode should be -1 if unknown.
+
+# Check that door exists
+var conDoor = Connect(doorName)
+    if conDoor < 0
+        Print("Door name invalid.")
+        return false
+    end
+# HanksSteeringComputer will be the server,
+# so any other computer should connect to it.
+    string serverName = "HanksSteeringComputer"
+    string key_name = "!d_" + doorName
+    if (Name() == serverName)
+        SaveMemory(key_name,doorCode)
+    else
+        var conID = Connect(serverName)
+        conID.SaveMemory(key_name,doorCode)
+        return true
+    end
+end
+
+void listDoors()
+    string serverName = "HanksSteeringComputer"
+    string code = "!d_"
+    var memKeys
+    if (Name() == serverName)
+        memKeys = GetMemories()
+        loop x in memKeys
+            if hasPrefix(x,code)
+                Print(removePrefix(x,3) + " ... " + LoadMemory(x) )
+            end
+        end
+        Print("EOF")
+    else
+        var conID = Connect(serverName)
+        memKeys = conID.GetMemories()
+        loop x in memKeys
+            if hasPrefix(x,code)
+                Print(removePrefix(x,3) + " ... " + conID.LoadMemory(x) )
+            end
+        end
+        Print("EOF")
+    end
+end 
+
+bool storeComputer(nickname,computerName)
+# before storing the computer name, verify 
+# that it can be connected to it. If not, 
+# return bool = false.
+
+# Check that computer exists
+if Name() == computerName 
+    #continue
+else
+    var conComp = Connect(computerName)
+    if conComp < 0
+        Print("Computer name invalid.")
+        return false
+    end
+end
+# HanksSteeringComputer will be the server,
+# so any other computer should connect to it.
+    string serverName = "HanksSteeringComputer"
+    string key_name = "!c_" + nickname
+    if (Name() == serverName)
+        SaveMemory(key_name,computerName)
+    else
+        var conID = Connect(serverName)
+        conID.SaveMemory(key_name,computerName)
+        return true
+    end
+end
+
+void listComputers()
+    string serverName = "HanksSteeringComputer"
+    string code = "!c_"
+    var memKeys
+    if (Name() == serverName)
+        memKeys = GetMemories()
+        loop x in memKeys
+            if hasPrefix(x,code)
+                Print(removePrefix(x,3) + " ... " + LoadMemory(x) )
+            end
+        end
+        Print("EOF")
+    else
+        var conID = Connect(serverName)
+        memKeys = conID.GetMemories()
+        loop x in memKeys
+            if hasPrefix(x,code)
+                Print(removePrefix(x,3) + " ... " + conID.LoadMemory(x) )
+            end
+        end        
+        Print("EOF")        
+    end
+end 
+
+array getComputers()
+    array computerData = []    
+    string serverName = "HanksSteeringComputer"
+    string code = "!c_"
+    var memKeys
+    number i = 0
+    if (Name() == serverName)
+        memKeys = GetMemories()
+        
+        loop x in memKeys
+            if hasPrefix(x,code)
+                computerData[i*2] = removePrefix(x,3)
+                computerData[i*2+1] = LoadMemory(x)
+                i = i + 1
+            end #if hasPrefix
+        end
+        return computerData
+    else
+        var conID = Connect(serverName)
+        memKeys = conID.GetMemories()
+        loop x in memKeys
+            if hasPrefix(x,code)
+                computerData[i*2] = removePrefix(x,3) 
+                computerData[i*2+1] = conID.LoadMemory(x)
+                i = i + 1
+            end #if hasPrefix
+        end        
+        return computerData
+    end
+end 
+
+##########################################
+void SlurpUI()
+    DisconnectAll()
+    # Form array of computer connections
+    # Allow navigation and selection
+    # Connect to ONE computer and Slurp()
+    array compData = getComputers()
+    number numComps = Count(compData)/2
+    number maxIndex = numComps - 1
+    var id = -1
+    var i
+    loop
+        i = Input("Select hosts or (Q)uit = [0..."+maxIndex+"] : ")
+        if i == "q" or i == "Q"
+            return #exit loop
+        else if i<0 or i>= numComps
+            Print("out of range")
+        else # Display host!
+            Print(compData[i*2])  #nickname+prefix
+            Print(compData[i*2+1])#name
+            string c = Input("(S)lurp, (D)elete, (N)either, or (Q)uit? ")
+            if c == "s" or c == "S"
+               id =  Connect(compData[i*2+1])
+                Print("Connections: "+ GetConnections())
+                Sleep(1)
+                Slurp()
+            else if c == "d" or c == "D"
+                Print("Delete function not implemented.")
+            else if c == "q" or c == "Q"
+                return
+            else
+                # must be (N)either, keep looping.
+            end
+#if input
+        end
+#if host
+    end #loop
+end #SlurpUI()
+          
+
+#########################################
+# Find Stuff
+void findUI()
+string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+var find = Connect(findServer)
+Bar()
+Print("Enter Name to Find: ")
+var name  = Input(">")
+var location = find.GetRoom(name)
+var action = find.GetAction(name)
+Print("Name: " + name)
+Print("Location: " + location)
+Print("Action: " + action)
+#GetPeople()
+#GetThingsOfType( type )
+#GetPosition( name )
+#GetAction( name )
+#GetRoom( name )
+#GetThingsInRoom( roomName )
+#GetThingsOfType( type )
+#GetAllRooms()
+#GetTypeOfThing( name )
+end
+
+array magicDoor()
+    string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(findServer)
+    array doorsUnlocked = []
+    var  sebRoom = find.GetRoom("Sebastian")
+    var sebPos = find.GetPosition("Sebastian")
+    array things = find.GetThingsInRoom(sebRoom)
+    loop @ in things
+        if find.GetTypeOfThing(@) == "door"
+            if Unlock(@)
+                Append(doorsUnlocked, @)
+            else
+                Append(doorsUnlocked, "Failed: " + @)
+            end #if Unlocked
+    end #if Door   
+    end #loop in things
+
+    return doorsUnlocked
+end
+
+#########################################
+
+
+
+
+
+void loadConnections()
+#slurpLocations
+
+storeComputer("Hank", "HanksSteeringComputer")
+storeComputer("Hotel_Outside", "Hotel_Exterior_CurcuitLocker_1")
+storeComputer("HackWorld", "Lowenbrau")
+storeComputer("PoliceExterior", "PoliceOffice_Exterior_FlatScreen_FlatComputerScreen_1")
+storeComputer("HackFuseboxPlaza", "Plaza_FuseBox_Poor_FuseBox_1")
+storeComputer("LargeComputer", "LargeComputerL3_LargeComputerL3")
+storeComputer("Hotel_Server_Basement", "Hotel_ServerBasement_LargeComputerL3_LargeComputerL3_1")
+storeComputer("Factory_ServerRoom", "Factory_ServerRoom_LargeComputerL3_LargeComputerL3_1")
+storeComputer("Franks_Sink","Frank_Room_Poor_WaterTap_Poor_WaterTap_1")
+#Connect("Seaschack1_LargeComputerL3_LargeComputerL3_1")
+
+end
+

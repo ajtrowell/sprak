@@ -1,0 +1,616 @@
+array gcArrowKeys = ["left", "right", "up", "down"]
+array gcKeys = ["space", "left", "right", "up", "down"]
+var gWidthFiller = ""
+
+Main()
+
+void Main()
+    Initialization()
+
+    string selectionViewFloppy = "View floppy"
+    string selectionViewMemory = "View memory"
+    string selectionClearMemories = "Clear memories"
+    string selectionViewPeople = "View people"
+    
+    array selections = []
+    
+    if (HasFloppy())
+        Append(selections, selectionViewFloppy)
+    end
+    Append(selections, selectionViewPeople)
+    Append(selections, selectionViewMemory)
+    Append(selections, selectionClearMemories)
+
+    loop
+        string selection = Menu("Main menu", selections)
+
+        if (selection == selectionViewFloppy)
+            ViewFloppy()
+        else if (selection == selectionViewMemory)
+            ViewMemory()
+        else if (selection == selectionClearMemories)
+            ClearMemory()
+        else if (selection == selectionViewPeople)
+            ViewPeople()
+        else
+           ClearText()
+           DisplayGraphics()
+           Print("Unknown selection: " + selection)
+           Sleep(2)
+        end
+    end
+end
+
+void ViewFloppy()
+    var floppyDataLines = LoadData()
+    Less("Floppy data", floppyDataLines)
+end
+
+void ViewMemory()
+    array area = GetDisplayTextSize()
+    number textWidth = area[0]
+
+    var memoryKeys = GetMemories()
+    string selected = Menu("Stored memories", memoryKeys)
+    string memory = LoadMemory(selected)
+    array lines = SplitByLength(memory, textWidth)
+    Less("Memory: " + selected, lines)
+end
+
+void ClearMemory()
+    array selections = []
+    
+    Append(selections, "no")
+    Append(selections, "yes")
+
+    string selection = Menu("Clear memory.  Are you sure?", selections)
+    if (selection == "yes")
+        ClearMemories()
+        Print("Memories cleared.")
+        Sleep(2)
+    end
+end
+
+
+void GetDisplayTextSize()
+    string memoryKey = "textarea"
+    number charWidth = -1
+    number charHeight = -1
+    if HasMemory(memoryKey)
+        string serialized = LoadMemory(memoryKey)
+        string tmp = ""
+        number state = 0
+        loop c in serialized
+            if (state == 0)
+                if (c == ",")
+                    charWidth = tmp
+                    tmp = ""
+                    state = 1
+                else
+                    tmp += c
+                end
+            else if (state == 1)
+                    tmp += c
+            end
+        end
+        charHeight = tmp
+    else
+        Print("Need to calculate screen size.")
+        Sleep(2)
+
+        loop i from 0 to 100
+            Print(i)
+        end
+        number firstNumber = Input("First number on screen: ")
+        charHeight = 102 - firstNumber
+
+        ClearText()
+        
+        number val_a = CharToInt("a")
+        number val_A = CharToInt("A")
+        number val_z = CharToInt("z")
+        number val_Z = CharToInt("Z")
+        
+        loop i from 1 to 10
+            PrintS(" ")
+        end
+        loop i from val_A to val_Z
+            PrintS(IntToChar(i))
+        end
+        loop i from val_a to val_z
+            PrintS(IntToChar(i))
+        end
+        Print("")
+        string lastChar = Input("Last letter on first line of screen: ")
+        number lastCharAsInt = CharToInt(lastChar[0])
+        
+        if lastCharAsInt <= val_Z
+            charWidth = (lastCharAsInt - val_A) + 11
+            Print("A-Z range")
+        else
+            charWidth = (lastCharAsInt - val_a) + 37
+            Print("a-z range")
+        end
+        
+        ClearText()
+
+        SaveMemory(memoryKey, charWidth + "," + charHeight)
+    end
+
+    return [charWidth, charHeight]
+end
+
+void Initialization()
+    # Get width if necessary
+    array area = GetDisplayTextSize()
+    number width = area[0]
+
+    loop i from 1 to width
+        gWidthFiller += " "
+    end
+end
+
+void Menu(string description, array selections)
+    array area = GetDisplayTextSize()
+    number textHeight = area[1]
+    number selectionCount = Count(selections)
+    number visibleLines = textHeight - 1
+    number selection = 0
+    string lastSelection = ""
+    bool lowerRetryWait = False
+
+    ClearText()
+    TextLine(0, description)
+
+    loop
+        var offset = Min( Max(0, selection - Int(visibleLines / 2)), Max(0, (selectionCount - visibleLines)) )
+
+        loop i from 0 to (textHeight - 2)
+            var iLine = offset + i
+            var visibleLine = i + 1
+            if (iLine < selectionCount)
+                if (iLine == selection)
+                    TextLine(visibleLine, "> " + selections[iLine])
+                else
+                    TextLine(visibleLine, "  " + selections[iLine])
+                end
+            else
+                TextLine(visibleLine, "")
+            end
+        end
+
+        number retryWait = Milliseconds(300)
+        if (lowerRetryWait)
+            retryWait = Milliseconds(50)
+        end
+
+        var pressed = WaitForButtonPress(Milliseconds(300), retryWait)
+
+        lowerRetryWait = pressed == lastSelection
+        lastSelection = pressed
+
+        if (pressed == "space")
+            return selections[selection]
+        else if (pressed == "up")
+            if (selection == 0)
+                # Wrap around
+                selection = selectionCount - 1
+            else
+                selection = Max(selection - 1, 0)
+            end
+        else if (pressed == "down")
+            if (selection == selectionCount - 1)
+                # Wrap around
+                selection = 0
+            else
+                selection = Min(selection + 1, selectionCount - 1)
+            end
+        else if (pressed == "left")
+            selection = Max(selection - visibleLines, 0)
+        else if (pressed == "right")
+            selection = Min(selection + visibleLines, selectionCount - 1)
+        end
+
+        DisplayGraphics()
+    end
+end
+
+void Less(string name, array lines)
+    array area = GetDisplayTextSize()
+    number textHeight = area[1]
+    number lineCount = Count(lines)
+    number visibleLines = textHeight - 1
+    string lastSelection = ""
+    bool lowerRetryWait = False
+
+    var offset = 0
+    loop
+        loop i from 0 to (textHeight - 2)
+            var iLine = offset + i
+            if (iLine < lineCount)
+                TextLine(i, lines[iLine])
+            else
+                TextLine(i, "")
+            end
+        end
+
+        number lastLineVisible = Min(offset + visibleLines, lineCount)
+        string lineInfo = "(" + lastLineVisible + "/" + lineCount + ")"
+        TextLine(textHeight - 1, lineInfo + " " + name)
+
+        number retryWait = Milliseconds(300)
+        if (lowerRetryWait)
+            retryWait = Milliseconds(50)
+        end
+
+        var pressed = WaitForButtonPress(Milliseconds(300), retryWait)
+
+        lowerRetryWait = pressed == lastSelection
+        lastSelection = pressed
+
+        if (pressed == "space")
+            return
+        else if (pressed == "up")
+            offset = Max(offset - 1, 0)
+        else if (pressed == "down")
+            if (offset < (lineCount - visibleLines))
+                offset = Min(offset + 1, Max(lineCount - visibleLines, 0))
+            end
+        else if (pressed == "left")
+            offset = Max(offset - visibleLines, 0)
+        else if (pressed == "right")
+            if (offset < (lineCount - visibleLines))
+                offset = offset + visibleLines
+            end
+        end
+        DisplayGraphics()
+    end
+end
+
+number Max(number a, number b)
+    if (a > b)
+        return a
+    else
+        return b
+    end
+end
+
+number Min(number a, number b)
+    if (a < b)
+        return a
+    else
+        return b
+    end
+end
+
+array Split(string str, string delimiter)
+    number size = Count(str)
+    number delimiterSize = Count(delimiter)
+
+    if (size <= 0)
+        return []
+    end
+
+    array ret = []
+    string currentLine = ""
+
+    number i = 0
+    loop
+        if (HasSubstringAt(str, i, "\n"))
+            Append(ret, currentLine)
+            currentLine = ""
+            i += delimiterSize
+        else
+            currentLine += str
+            i += 1
+        end
+
+        if (i >= size)
+            break
+        end
+    end
+
+    Append(ret, currentLine)
+    return ret
+end
+
+array SplitByLength(string str, number maxLen)
+    number size = Count(str)
+
+    if (size <= 0)
+        return []
+    end
+
+    array ret = []
+    string currentLine = ""
+
+    number i = 0
+    loop c in str
+        if (i == maxLen)
+            Append(ret, currentLine)
+
+            currentLine = ""
+            i = 0
+        end
+
+        currentLine += c
+        i += 1
+    end
+
+    if (Count(currentLine) > 0)
+        Append(ret, currentLine)
+    end
+    return ret
+end
+
+bool HasSubstringAt(string haystack, number haystackPos, string needle)
+    number size = Count(haystack)
+    number remainingSize = size - haystackPos
+    number needleSize = Count(needle)
+
+    if (remainingSize < needleSize)
+        return False
+    end
+
+    loop i from 0 to (needleSize - 1)
+        if (haystack[haystackPos + i] != needle)
+            return False
+        end
+    end
+    return True
+end
+
+number Milliseconds(number ms)
+    return ms * 0.001
+end
+
+void TextLine(number lineNumber, string text)
+    Text(0, lineNumber, text + gWidthFiller)
+end
+
+string PressedButtons()
+    if (IsKeyPressed("space"))
+        return "space"
+    end
+
+    array keys = []
+    loop key in gcArrowKeys
+        if (IsKeyPressed(key))
+            Append(keys, key)
+        end
+    end
+    return Join(keys, "-")
+end
+
+string Join(array parts, string join)
+    string ret = ""
+
+    number count = 0
+    loop part in parts
+        if (count > 0)
+            ret += join
+        end
+        ret += part
+        count += 1
+    end
+    return ret
+end
+
+bool IsPrefixOf(string prefix, string str)
+    var prefixSize = Count(prefix)
+    var strSize = Count(str)
+    if strSize < prefixSize
+        return False
+    end
+    var i = 0
+    loop c in prefix
+        if c != str
+            return False
+        end
+        i += 1
+    end
+    return True
+end
+
+
+string WaitForButtonPress(number timeoutDelay, number repeatDelay)
+    var existing = PressedButtons()
+    number now = Time()
+
+    number repeatTimeout = now + repeatDelay
+    number timeout = Time() + timeoutDelay
+
+    loop
+        var time = Time()
+
+        DisplayGraphics()
+
+        var pressed = PressedButtons()
+        if (pressed != "")
+            if (time <= repeatTimeout)
+                if (existing != pressed)
+                    return pressed
+                end
+            else
+                return pressed
+            end
+        end
+
+        if (timeoutDelay > 0 && time > timeout)
+            return ""
+        end
+    end
+end
+
+var PersonServer()
+    # GetPeople :: [String]
+    # GetPosition :: String -> String
+    #    "ROOMNAME, coordinate: (X,Y)
+    # GetAction :: PersonName -> String
+    # GetRoom :: PersonName -> String
+    # GetThingsInRoom :: RoomName -> [String]
+    # GetAllRooms :: [String]
+    return Connect("PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1")
+end
+
+string GetAction(string person)
+    var s = PersonServer()
+    Print("Retrieving action...")
+    string action = s.GetAction(person)
+    Print("Action retrieved...")
+    DisconnectAll()
+    return action
+end
+
+string GetPosition(string person)
+    var s = PersonServer()
+    Print("Retrieving position...")
+    string position = s.GetPosition(person)
+    Print("Position retrieved...")
+    DisconnectAll()
+    return position
+end
+
+var GetPeople()
+    var s = PersonServer()
+    Print("Retrieving people...")
+    var people = s.GetPeople()
+    Print("Sorting people...")
+    MergeSortString(people)
+    Print("People retrieved...")
+    DisconnectAll()
+    return people
+end
+
+void ViewPeople()
+    array people = GetPeople()
+    string person = Menu("People", people)
+
+    array positionInfo = ParsePosition(GetPosition(person))
+    array lines = []
+    Append(lines, "Person: " + person)
+    Append(lines, "  Room: " + positionInfo[0])
+    Append(lines, "  Coord: " + positionInfo[1] + ", " + positionInfo[2])
+    Append(lines, "  Action: " + GetAction(person))
+
+    Less(person, lines)
+end
+
+number CompareString(string a, string b)
+    var aLen = Count(a)
+    var bLen = Count(b)
+
+    var pos = 0
+    loop
+        if pos == aLen && pos == bLen
+            return 0
+        else if pos == aLen
+            return -1
+        else if pos == bLen
+            return 1
+        else
+            var diff = CharToInt(a[pos]) - CharToInt(b[pos])
+            if diff != 0
+                return diff
+            else
+                pos += 1
+            end
+        end
+    end
+end
+
+array ParsePosition(string position)
+    number rule = 1
+    string working = ""
+    string room = "Unknown"
+    number x = -1
+    number y = -1
+
+    loop c in position
+        if rule == 1
+            if c == ":"
+                rule = 2
+            end
+        else if rule == 2
+            rule = 3
+        else if rule == 3
+            if c == " " or c == ","
+                rule = 4
+                room = working
+                working = ""
+            else
+                working = working + c
+            end
+        else if rule == 4
+            if c == "("
+                rule = 5
+            end
+        else if rule == 5
+            if c == ","
+                rule = 6
+                x = working
+                working = ""
+            else
+                working = working + c
+            end
+        else if rule == 6
+            if c == ")"
+                rule = 7
+                x = working
+                working = ""
+            else
+                working = working + c
+            end
+        end
+    end
+    return [room,x,y]
+end
+
+
+# Sort Functions
+##################################################
+
+void MergeSortString(array arr)
+    array work = []
+    if Count(arr) > 0
+        TopDownSplitMergeString(arr, 0, Count(arr), work)
+    end
+end
+
+void TopDownSplitMergeString(array a, number iBegin, number iEnd, array b)
+    if(iEnd - iBegin < 2)
+        return
+    end
+
+    number iMiddle = Int((iEnd + iBegin) / 2)
+    TopDownSplitMergeString(a, iBegin, iMiddle, b)
+    TopDownSplitMergeString(a, iMiddle, iEnd, b)
+    TopDownMergeString(a, iBegin, iMiddle, iEnd, b)
+    CopyArray(b, iBegin, iEnd, a)
+end
+
+void TopDownMergeString(array a, number iBegin, number iMiddle, number iEnd, array b)
+    var i0 = iBegin
+    var i1 = iMiddle
+
+    loop j from iBegin to (iEnd - 1)
+        # Why split this up?  "if" parameters are broken when this was written
+        var postCheck = i1 >= iEnd;
+        if postCheck == False
+            postCheck = CompareString(a[i0], a[i1]) < 1
+        end
+        if (i0 < iMiddle && postCheck)
+            b[j] = a[i0]
+            i0 += 1
+        else
+            b[j] = a[i1]
+            i1 += 1
+        end
+    end
+end
+
+void CopyArray(array b, number iBegin, number iEnd, array a)
+    loop k in Range(iBegin, iEnd - 1)
+        a[k] = b[k]
+    end
+end[/code]
