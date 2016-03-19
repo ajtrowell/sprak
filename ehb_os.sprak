@@ -37,7 +37,7 @@ loop
         Print(" - encrypt")        
         Print(" - info")        
         Print(" - clear")
-        Print(" - find - Find entities")
+        Print(" - find(2) - Find entities")
         Print(" - floppy")                
         Print(" - slurp")                
     else if cmd == "connect"
@@ -85,6 +85,8 @@ loop
          ClearText()
      else if cmd == "find"
          findUI()
+     else if cmd == "find2"
+         findNearby()
     else if cmd == "floppy"
         BootFromFloppy()
     else if cmd == "slurp"
@@ -512,6 +514,55 @@ Print("Action: " + action)
 #GetTypeOfThing( name )
 end
 
+void findNearby()
+    string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(findServer)
+    Bar()
+    #find person or object
+    Print("Enter Name to Find: ")
+    var name  = Input(">")
+    var location = find.GetRoom(name)
+    var action = find.GetAction(name)
+    Print("Name: " + name)
+    Print("Location: " + location)
+    Print("Action: " + action)
+    #store array of nearby objects
+    array objects = find.GetThingsInRoom(location)
+    array types = []
+        loop @ in objects
+            if IsUniqueIn(@,types)
+                Append(types, find.GetTypeOfThing(@))
+            end #if IsUnique
+        end #loop in objects
+
+    #display types of objects in room
+        #requires ability to find unique array entries
+    Print("Choose an object type to list: ")
+    Print(types)
+    #Take Input on which object type to list
+    var selType = Input(">")
+    #List all objects in room of specified type
+        #use fancy menu,allows selection
+        #eg DisplayArray(array list,number linesPerRercord)
+    array thingsOfType = [] #GetThingsInRoomOfType(location,selType)
+    Print("Filtered list goes here...")
+    #selected object name stored in "sel" key
+        #if sel key contains a computer name,
+        #it should be displayed on the Slurp menu
+end #findNearby()
+
+bool IsUniqueIn(array list,var element)
+    #should evaluate whether ANY of the elements of list == element
+    return true
+end
+
+array GetThingsInRoomOfType(string room, string type)
+    array thingNamesAll = []
+    array thingNamesOfType = []    
+    #populate arrays with filtered list
+    return thingNamesOfType
+end
+
 array magicDoor()
     string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
     var find = Connect(findServer)
@@ -553,4 +604,3 @@ storeComputer("Franks_Sink","Frank_Room_Poor_WaterTap_Poor_WaterTap_1")
 #Connect("Seaschack1_LargeComputerL3_LargeComputerL3_1")
 
 end
-
