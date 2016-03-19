@@ -530,7 +530,7 @@ void findNearby()
     array objects = find.GetThingsInRoom(location)
     array types = []
         loop @ in objects
-            if IsUniqueIn(@,types)
+            if IsUniqueIn(find.GetTypeOfThing(@),types)
                 Append(types, find.GetTypeOfThing(@))
             end #if IsUnique
         end #loop in objects
@@ -544,22 +544,38 @@ void findNearby()
     #List all objects in room of specified type
         #use fancy menu,allows selection
         #eg DisplayArray(array list,number linesPerRercord)
-    array thingsOfType = [] #GetThingsInRoomOfType(location,selType)
+    array thingsOfType = GetThingsInRoomOfType(location,selType)
     Print("Filtered list goes here...")
+    Print(thingsOfType)
     #selected object name stored in "sel" key
         #if sel key contains a computer name,
         #it should be displayed on the Slurp menu
 end #findNearby()
 
-bool IsUniqueIn(array list,var element)
+bool IsUniqueIn(var element, array list)
     #should evaluate whether ANY of the elements of list == element
-    return true
+    number sizeList = Count(list)
+    bool isUnique = true #start assuming unique
+    loop @ in list
+        if @ == element
+            isUnique = false
+            break
+        end
+    end #loop in list
+    return isUnique
 end
 
 array GetThingsInRoomOfType(string room, string type)
-    array thingNamesAll = []
-    array thingNamesOfType = []    
+    string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(findServer)
+    array thingNamesAll = find.GetThingsInRoom(room)
+    array thingNamesOfType = []
     #populate arrays with filtered list
+    loop @ in thingNamesAll
+        if find.GetTypeOfThing(@) == type
+            Append(thingNamesOfType, @)
+        end #if type
+    end #loop in all things
     return thingNamesOfType
 end
 
