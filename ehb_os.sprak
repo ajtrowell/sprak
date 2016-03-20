@@ -2,10 +2,12 @@ string gcServer = "HanksSteeringComputer"
 
 #loadConnections()
 
-#array test=[The,quick,Brown,fox,Jumps,over,The,lazy,Dog,lassie]
-#var foo = DisplayArray(test,1)
+array test=["The","quick","Brown","fox","Jumps","over"]
+var foo = DisplayArray(test,2)
+Print("RETURNED: ")
+Print(foo)
 
-os()
+#os()
 
 ####
 
@@ -325,7 +327,7 @@ var DisplayArray(array list, number linesPerRecord)
     number totalRecords = totalLines / linesPerRecord
     number maxRecordIndex = totalRecords - 1
     number maxLineIndex = linesPerRecord - 1
-    number remainderCheck = totalLines mod linesPerRecord
+    number remainderCheck = Mod(totalLines, linesPerRecord)
     number loopDelay = 0.1
     #Error Checking
     if remainderCheck != 0
@@ -350,7 +352,7 @@ var DisplayArray(array list, number linesPerRecord)
         #After printing the Record, wait  for a keypress:
         loop #keypress loop
             if IsKeyPressed("up")
-                #Error Check
+               #Error Check
                 if x>0
                     x--
                 end
