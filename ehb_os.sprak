@@ -2,6 +2,9 @@ string gcServer = "HanksSteeringComputer"
 
 #loadConnections()
 
+#array test=[The,quick,Brown,fox,Jumps,over,The,lazy,Dog,lassie]
+#var foo = DisplayArray(test,1)
+
 os()
 
 ####
@@ -308,8 +311,76 @@ string repeatString(inString,n_repeats)
     return outString
 end
 
-# stringDelimiter
+var DisplayArray(array list, number linesPerRecord)
+    #Use up/down to navigate array one element at a time
+    #showing element line numbers
+    #pressing "space" should save the current element
+    #to the "sel" memory key, and break the loop.
+    #Pressing right should display 5 next lines,
+    #Pressing left should display 5 previous lines.
 
+    #In addition to placing the array element into the "sel" key,
+    #the array element will be returned by this function.
+    number totalLines = Count(list)
+    number totalRecords = totalLines / linesPerRecord
+    number maxRecordIndex = totalRecords - 1
+    number maxLineIndex = linesPerRecord - 1
+    number remainderCheck = totalLines mod linesPerRecord
+    number loopDelay = 0.1
+    #Error Checking
+    if remainderCheck != 0
+        Print("Error in linesPerRecord, remainder= " + remainderCheck)
+        return "Error: linesPerRecord had remainder"
+    end #if remainderCheck
+    if linesPerRecord<1 or linesPerRecord>totalLines
+        Print("Error in size of linesPerRecord")
+        return "Error: linesPerRecord out of scope"
+    end #if linesPerRecord out of scope
+
+    number x = 0 #RecordIndexCounter
+    bool continueLoop = true #use to escape loopRecords
+    #loop x from 0 to maxRecordIndex
+    loop #do-until(continueLoop == false)
+        
+        PrintS(x +" - ") #Numer the records starting from 0
+        loop lineIndex from 0 to maxLineIndex
+            Print(list[x*linesPerRecord + lineIndex])
+        end #loop lines(inRecords)
+
+        #After printing the Record, wait  for a keypress:
+        loop #keypress loop
+            if IsKeyPressed("up")
+                #Error Check
+                if x>0
+                    x--
+                end
+                Sleep(loopDelay)                
+                break
+            else if IsKeyPressed("down")
+                #Error Check
+                if x<maxRecordIndex
+                    x++
+                end
+                Sleep(loopDelay)                
+                break
+            else if IsKeyPressed("space")
+                continueLoop = false
+                break
+            end #if KeyPressed
+        end #keypress loop
+
+        if continueLoop == false
+            #do things, then
+            SaveMemory("sel",list[x*linesPerRecord + maxLineIndex]) #grab last line
+            return list[x*linesPerRecord + maxLineIndex]
+            break
+        end #if/loop    
+    end #loopRecords - do-until(continueLoop == false)
+
+end #DisplayArray(array list, number linesPerRecord)
+
+
+# stringDelimiter
 
 ##########################################
 # Database Functions
