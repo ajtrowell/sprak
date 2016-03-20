@@ -2,12 +2,7 @@ string gcServer = "HanksSteeringComputer"
 
 #loadConnections()
 
-array test=["The","quick","Brown","fox","Jumps","over"]
-var foo = DisplayArray(test,2)
-Print("RETURNED: ")
-Print(foo)
-
-#os()
+os()
 
 ####
 
@@ -611,15 +606,26 @@ void findNearby()
     #display types of objects in room
         #requires ability to find unique array entries
     Print("Choose an object type to list: ")
-    Print(types)
+    #Print(types)
     #Take Input on which object type to list
-    var selType = Input(">")
+    #var selType = Input(">")
+    var selType = DisplayArray(types,1)
     #List all objects in room of specified type
         #use fancy menu,allows selection
         #eg DisplayArray(array list,number linesPerRercord)
     array thingsOfType = GetThingsInRoomOfType(location,selType)
     Print("Filtered list goes here...")
-    Print(thingsOfType)
+    #Print(thingsOfType)
+    var sel = DisplayArray(thingsOfType,1)
+    if find.GetTypeOfThing(sel) == "computer"
+        var selPC = Connect(sel) #Create connection to this computer
+        var fly = Input("Do you want to slurp to this computer?")
+            if fly == "Y" or fly == "y"
+                Slurp()
+            else
+                Print("Computer name is in the sel memory key")
+            end #if fly
+    end #selected a computer
     #selected object name stored in "sel" key
         #if sel key contains a computer name,
         #it should be displayed on the Slurp menu
