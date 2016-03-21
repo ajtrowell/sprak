@@ -264,6 +264,12 @@ Print("------------")
 Sleep(4)
     
 end
+##########################################
+
+
+
+
+
 
 ##########################################
 # String functions
@@ -378,6 +384,17 @@ end #DisplayArray(array list, number linesPerRecord)
 
 
 # stringDelimiter
+array stringDelimiter(string cmd,string delimiter)
+#Should take a string of delimiter separated elements and
+#output elemements as an array.
+#Eg: cmdString = "find Monad", delimiterString = " "
+#Array output=["find","Monad"]
+#The first element coudl be used as the command,
+#then Remove could extract the first element of the array
+#and the rest could be passed to a function as the argument.
+
+end #stringDelimiter()
+
 
 ##########################################
 # Database Functions
@@ -557,6 +574,23 @@ void SlurpUI()
     end #loop
 end #SlurpUI()
           
+#########################################
+# Log Functions
+
+void StoreLog(string message)
+    #Store in memory with time stamp.
+    Print(message)  #Temporary Solution
+end #StoreLog()
+
+
+
+void DisplayLogs()
+    #Once Logs are stored rather than displayed,
+    #this will output
+
+end #DisplayLogs()
+
+
 
 #########################################
 # Find Stuff
@@ -677,6 +711,15 @@ array magicDoor()
 
     return doorsUnlocked
 end
+
+void findAll
+    #Browse all Characters
+    #Produce list of all object types
+    #Produce a list of all rooms
+    #Sort above lists alphabetically
+    #Store each array into memory using fancy functions
+end
+
 
 #########################################
 
