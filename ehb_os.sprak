@@ -826,7 +826,7 @@ array magicDoor()
     return doorsUnlocked
 end
 
-void findAll
+void findAll()
     #Browse all Characters
     #Produce list of all object types
     #Produce a list of all rooms
