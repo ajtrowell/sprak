@@ -1,5 +1,6 @@
 string gcServer = "HanksSteeringComputer"
 
+
 #loadConnections()
 
 os()
@@ -57,6 +58,7 @@ loop
         loop x in memories
             Print(x + " ..... " + LoadMemory(x) )
         end
+        DisplayArray(memories,1)
     else if cmd == "delete"
         Print("Enter the memory key to delete: ")
         var delete_key = Input("...")
@@ -94,9 +96,9 @@ loop
     else
         Print("Can't understand command " + cmd)
         Print("Enter h for help.")
-    end
+    end #if cmd == 
     Sleep(1)
-end
+end #loop (endless)
 end #os() function
 
 
@@ -127,7 +129,7 @@ bool openDoor(string target)
             if IsKeyPressed("up")
                 Bar()
                 break
-            end
+            end #if KeyPressed
             Print("Trying code: " + x)
             var success = id.Unlock(x)
             if success
@@ -135,10 +137,10 @@ bool openDoor(string target)
                 Print("*******************")
                 storeDoor(target,x)
                 break
-            end
-        end
-    end    
-end
+            end #if success
+        end #loop codes
+    end #if id
+end #openDoor()
 
 ########################################################
 
@@ -213,7 +215,7 @@ bank.ChangeBalance(user, amount)
 Print("Transaction completed.")
 Print("*****************")
 Print("")
-end        
+end #BankUI()
 
 ##########################################
 
@@ -235,35 +237,29 @@ void CircleUI()
 end
 
 void EncryptUI()
-   ClearText()
+    ClearText()
+    string s = Input("Enter key: ")
+    number k = CharToInt(s[0])
+    Print("Enter message:")
+    string message = Input("")
+    string encrypted = ""
+    loop c in message
+        if c == " "
+            encrypted += " "
+        else
+            var sum = Mod(k + CharToInt(c), 26)
+            #Print("sum for " + c + " = " + sum)
+            var c2 = IntToChar(sum)
+            encrypted += c2
+        end #if c
+    end #loop c
+    Print("Encrypted:")
+    Print("------------")
+    Print(encrypted)
+    Print("------------")
+    Sleep(4)
+end #EncryptUI()
 
-string s = Input("Enter key: ")
-number k = CharToInt(s[0])
-
-Print("Enter message:")
-string message = Input("")
-
-string encrypted = ""
-
-loop c in message
-    if c == " "
-        encrypted += " "
-    else
-        var sum = Mod(k + CharToInt(c), 26)
-        #Print("sum for " + c + " = " + sum)
-
-        var c2 = IntToChar(sum)
-        encrypted += c2
-    end
-end
-
-Print("Encrypted:")
-Print("------------")
-Print(encrypted)
-Print("------------")
-Sleep(4)
-    
-end
 ##########################################
 #Store arrays into memory!
 
@@ -649,6 +645,18 @@ array getComputers()
     end
 end 
 
+bool IsFriend(string name)
+    array globalFriends = ["Pixie","Yulian","Fib","Frank","Ivan"]
+    Append(globalFriends,"Sebastian")
+    array globalEnemies = ["Monad","Police","Dave","Svante"]
+    if IsUniqueIn(name,globalFriends) #isn't in frineds
+        return False #not frined
+    else
+        return True #friends
+    end #if
+end #IsFriend()
+
+
 ##########################################
 void SlurpUI()
     DisconnectAll()
@@ -709,30 +717,30 @@ end #DisplayLogs()
 #########################################
 # Find Stuff
 void findUI()
-string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
-var find = Connect(findServer)
-Bar()
-Print("Enter Name to Find: ")
-var name  = Input(">")
-var location = find.GetRoom(name)
-var action = find.GetAction(name)
-Print("Name: " + name)
-Print("Location: " + location)
-Print("Action: " + action)
-#GetPeople()
-#GetThingsOfType( type )
-#GetPosition( name )
-#GetAction( name )
-#GetRoom( name )
-#GetThingsInRoom( roomName )
-#GetThingsOfType( type )
-#GetAllRooms()
-#GetTypeOfThing( name )
+    string gcFindServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(gcFindServer)
+    Bar()
+    Print("Enter Name to Find: ")
+    var name  = Input(">")
+    var location = find.GetRoom(name)
+    var action = find.GetAction(name)
+    Print("Name: " + name)
+    Print("Location: " + location)
+    Print("Action: " + action)
+    #GetPeople()
+    #GetThingsOfType( type )
+    #GetPosition( name )
+    #GetAction( name )
+    #GetRoom( name )
+    #GetThingsInRoom( roomName )
+    #GetThingsOfType( type )
+    #GetAllRooms()
+    #GetTypeOfThing( name )
 end
 
 void findNearby()
-    string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
-    var find = Connect(findServer)
+    string gcFindServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(gcFindServer)
     Bar()
     #find person or object
     Print("Enter Name to Find: ")
@@ -750,7 +758,6 @@ void findNearby()
                 Append(types, find.GetTypeOfThing(@))
             end #if IsUnique
         end #loop in objects
-
     #display types of objects in room
         #requires ability to find unique array entries
     Print("Choose an object type to list: ")
@@ -790,11 +797,11 @@ bool IsUniqueIn(var element, array list)
         end
     end #loop in list
     return isUnique
-end
+end #IsUniqueIn()
 
 array GetThingsInRoomOfType(string room, string type)
-    string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
-    var find = Connect(findServer)
+    string gcFindServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(gcFindServer)
     array thingNamesAll = find.GetThingsInRoom(room)
     array thingNamesOfType = []
     #populate arrays with filtered list
@@ -804,11 +811,11 @@ array GetThingsInRoomOfType(string room, string type)
         end #if type
     end #loop in all things
     return thingNamesOfType
-end
+end #GetThingsInRoomOfType()
 
 array magicDoor()
-    string findServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
-    var find = Connect(findServer)
+    string gcFindServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(gcFindServer)
     array doorsUnlocked = []
     var  sebRoom = find.GetRoom("Sebastian")
     var sebPos = find.GetPosition("Sebastian")
@@ -820,11 +827,61 @@ array magicDoor()
             else
                 Append(doorsUnlocked, "Failed: " + @)
             end #if Unlocked
-    end #if Door   
+        end #if Door   
     end #loop in things
-
     return doorsUnlocked
-end
+end #magicDoor()
+
+array magicDefense() #Call from drinks or credit cards
+    #Find all computers in the room Sebastian is in.
+    string gcFindServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(gcFindServer)
+    string sebRoom = find.GetRoom("Sebastian")
+    array roomComputers = GetThingsInRoomOfType(sebRoom,"computer")
+Print("Got To roomComputers: " + roomComputers)
+    #Search for a computer with ZapPerson() function
+    string compName = "" #Almost superfluous
+    var compConnection = -1
+    bool foundZap = False #Initial assumption
+    if Count(roomComputers) > 0 
+        loop @ in roomComputers
+            compConnection = Connect(@)
+            if compConnection.HasFunction("ZapPerson")
+                Print("Found Zapper: "+@)
+                foundZap = True
+                compName = @
+                break #exit this loop
+            end #if HasFunction()
+        end #loop roomComputers
+    end #if Count>0
+    #If ZapPerson computer is found...
+    #Find every character NOT on "safe list" in room
+    #Zap every unsafe person in the room.
+    if foundZap
+        array roomCharacters = GetThingsInRoomOfType(sebRoom,"character")
+        array roomEnemies = []
+        loop @ in roomCharacters
+            if IsFriend(@)
+                #do nothing
+            else
+                Append(roomEnemies, @) 
+                compConnection.ZapPerson(@)
+                #compConnection.MovePerson(@, compName ) #Move to zapping computer?
+            end #IsUnique
+        end #loop in roomCharacters
+        Append(roomEnemies,compName) #Show computer name at end of list
+        #StoreLog("Zap report: "+roomEnemies)
+        return roomEnemies #gives something
+    else
+        #No computer found to ZapPerson
+    end #if foundZap
+end #magicDefense()
+
+array magicHack()
+    #Find computers with OnHack() and ZapPerson(), 
+    #And get them to crash out with invalid function calls.
+    #Will this work?
+end #magicHack()
 
 void findAll()
     #Browse all Characters
@@ -832,7 +889,7 @@ void findAll()
     #Produce a list of all rooms
     #Sort above lists alphabetically
     #Store each array into memory using fancy functions
-end
+end #findAll()
 
 
 #########################################
