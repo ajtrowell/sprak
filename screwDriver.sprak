@@ -1,0 +1,8 @@
+
+SetMhz(500)
+
+array apiList = ['internet','arcade','floopy','memory','door']
+loop apiList
+    EnableAPI(@)
+end
+

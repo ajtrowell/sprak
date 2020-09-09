@@ -1,0 +1,113 @@
+#Hotel_Lobby_ComputerCashier
+#HanksSteeringComputer
+#StationNorth_MediumSewerComputer_MediumSewerCoputer_2
+array computerNames = ["Hotel_Lobby_ComputerCashier"]
+#Append(computerNames,"StationNorth_MediumSewerComputer_MediumSewerCoputer_2")
+
+
+var ConnectionRegister(string nickName, string realName)
+    SaveMemory(nickName,realName)
+end
+
+var ShowConnections()
+    Print("Connections")
+    Print(GetConnections())
+    Print("Nicknames")
+    Print(GetMemories())
+end
+
+var AttachRegisteredComputers()
+    array memoryKeys = GetMemories()
+    loop memoryKeys
+        Connect( LoadMemory(@) )
+    end    
+end
+
+
+var ConnectToComputers()
+ loop computerNames
+        Print("Connecting to " + @)
+        #Connect(@)
+ end
+end
+
+var GraphicsTest()
+    Color(0,0,255)
+    number lineHeight = Height() - 5
+    Line(0,lineHeight,Width(),lineHeight)
+    DisplayGraphics()
+    Print("Width:  " + Width())
+    Print("Height: " + Height())
+end
+
+
+var DiagnosticStatus()
+    Print("Computer Name:")
+    Print(Name())
+end
+
+var ShowTime()
+    string minuteString
+    if GetMinute() < 10
+        minuteString = "0"+GetMinute()
+   else
+        minuteString = GetMinute()
+   end        
+    Print(GetHour()+":"+minuteString)
+end
+
+
+string Menu()
+    Print("** Main Menu **")
+    string cmd = Input("> ")
+    return cmd
+end
+
+
+var EvaluateMenuCommand(string cmd)
+   if cmd == "slurp"
+#       ConnectToComputers()
+       Print("Slurping...")
+       Slurp()
+   else if cmd == "find"
+       FinderMenu()
+   else
+       Print("Command Not Found...")
+       #Sleep(2)                   
+   end
+end
+
+var FinderMenu()
+    string policeNickname = 'PoliceFinder'
+    string policeName = LoadMemory(policeNickname)
+    var pc = Connect(policeName)
+    array fcnList = pc.FunctionList()
+    Print(fcnList)
+    string personName = Input("PersonName")
+    string location = pc.GetPosition(personName)
+    Print(location)
+end
+
+
+
+
+# Main Routine
+ClearText()
+DiagnosticStatus()
+ShowTime()
+GraphicsTest()
+Print(computerNames)
+ConnectToComputers()
+AttachRegisteredComputers()
+ShowConnections()
+
+loop
+    string cmd = Menu()
+    EvaluateMenuCommand(cmd)
+    Sleep(1)
+    Print("")
+end
+    
+
+
+
