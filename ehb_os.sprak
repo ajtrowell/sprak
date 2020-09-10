@@ -26,7 +26,7 @@ loop
         Print("ROOT")
     else if cmd == "h" or cmd == "help"
         Print("Available commands:")
-        Print(" - connect")
+        Print(" - connect [-v]")
         Print(" - store")
         Print(" - restore")
         Print(" - list")
@@ -40,10 +40,12 @@ loop
         Print(" - clear")
         Print(" - find(2) - Find entities")
         Print(" - floppy")                
-        Print(" - slurp")                
+        Print(" - slurp [now]")                
     else if cmd == "connect"
         string connectionName = Input("Name: ")
         id = Connect(connectionName)
+    else if cmd == "connect -v"
+        Print(GetConnections())
     else if cmd == "store"
         string key = Input("Key: ")
         string data = Input("Data: ")
@@ -76,23 +78,25 @@ loop
         var pcName = Input(": ")
         storeComputer(nickname,pcName)
     else if cmd == "door"
-         doorUI()
+        doorUI()
     else if cmd == "bank"
-         BankUI()
+        BankUI()
     else if cmd == "encrypt"
-         EncryptUI()         
+        EncryptUI()         
     else if cmd == "info"
-         Info()  
+        Info()  
     else if cmd == "clear"
-         ClearText()
+        ClearText()
      else if cmd == "find"
-         findUI()
+        findUI()
      else if cmd == "find2"
-         findNearby()
+        findNearby()
     else if cmd == "floppy"
         BootFromFloppy()
     else if cmd == "slurp"
-         SlurpUI()
+        SlurpUI()
+    else if cmd == "slurp now"
+        Slurp()
     else
         Print("Can't understand command " + cmd)
         Print("Enter h for help.")
@@ -669,6 +673,13 @@ void SlurpUI()
     var id = -1
     var i
     loop
+        # Show list of computer nicknames
+        loop Range(0, maxIndex)
+            PrintS(@ + '-' + compData[@*2] + '  ')
+            if Mod(@, 5) == 4 or @ == maxIndex
+                Print(" ")
+            end
+        end
         i = Input("Select hosts or (Q)uit = [0..."+maxIndex+"] : ")
         if i == "q" or i == "Q"
             return #exit loop
@@ -901,7 +912,7 @@ end #findAll()
 void loadConnections()
 #slurpLocations
 
-storeComputer("Hank", "HanksSteeringComputer")
+#storeComputer("Hank", "HanksSteeringComputer")
 storeComputer("Hotel_Outside", "Hotel_Exterior_CurcuitLocker_1")
 storeComputer("HackWorld", "Lowenbrau")
 storeComputer("PoliceExterior", "PoliceOffice_Exterior_FlatScreen_FlatComputerScreen_1")
