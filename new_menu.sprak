@@ -57,25 +57,24 @@ var ShowTime()
 end
 
 
-string Menu()
+var Menu()
     Print("** Main Menu **")
     string cmd = Input("> ")
-    return cmd
-end
 
-
-var EvaluateMenuCommand(string cmd)
-   if cmd == "slurp"
+    if cmd == "slurp"
 #       ConnectToComputers()
-       Print("Slurping...")
-       Slurp()
+        Print("Slurping...")
+        Slurp()
    else if cmd == "find"
        FinderMenu()
+   else if cmd == "clear" or cmd == "c"
+       ClearText()
    else
        Print("Command Not Found...")
        #Sleep(2)                   
    end
 end
+
 
 var FinderMenu()
     string policeNickname = 'PoliceFinder'
@@ -96,18 +95,29 @@ ClearText()
 DiagnosticStatus()
 ShowTime()
 GraphicsTest()
-Print(computerNames)
-ConnectToComputers()
+#Print(computerNames)
+#ConnectToComputers()
 AttachRegisteredComputers()
 ShowConnections()
 
 loop
     string cmd = Menu()
-    EvaluateMenuCommand(cmd)
     Sleep(1)
     Print("")
 end
     
 
+array parseCommand(string commandString)
+#parse with space deliminter into array
+#first word is the command
+#words starting with - are options
+#words after options are arguments
+#output should be an array containing 
+# a singleton and two arrays
+end
 
-
+array stringToArray(string input, string delimiter)
+# Break string at delimiter into an array 
+# of substrings
+# Array should not contain the delimiter
+end

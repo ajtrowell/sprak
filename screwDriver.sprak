@@ -1,5 +1,6 @@
 
 SetMhz(500)
+SetMaxTime(-2)
 
 array apiList = ['internet','arcade','floopy','memory','door']
 loop apiList

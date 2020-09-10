@@ -187,7 +187,7 @@ void BankUI()
 Print("*****************")
 
 var bank = Connect("FinanceComputer")
-var user = Input("User: (blank for self) ")
+var user = Input("User: (blank for self or list) ")
     if user==""
         user = GetUser()
     else if user == "list"
