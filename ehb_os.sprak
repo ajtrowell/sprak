@@ -118,12 +118,30 @@ void doorUI()
     Print("")
     Print("*******************")
     listDoors()
-    Print("Enter target door: ")
-    var target = Input("")
-    openDoor(target)
+    string cmd = Input("(U)nlock door by name or (S)et door destination by menu")
+    if cmd == 'U' or cmd == 'u'
+        Print("Enter target door: ")
+        var target = Input("")
+        Unlock(target) # Direct Unlock
+        storeDoor(target,'?')
+        #crackDoor(target)
+    else if  cmd == 'S' or cmd == 's'
+        #Make selection from menu
+        array doorNames = getStoredDoorNames()
+        var doorName = DisplayArray(doorNames,1)
+        SaveMemory('doorDestination', doorName)
+    else 
+        Print("Invalid Selection")
+    end 
 end
 
-bool openDoor(string target)
+
+string getDoorDestination()
+    return LoadMemory('doorDestination')
+end
+
+
+bool crackDoor(string target)
    var id = Connect(target)
     if id < 0
         Print("Failed to connect")
@@ -144,7 +162,7 @@ bool openDoor(string target)
             end #if success
         end #loop codes
     end #if id
-end #openDoor()
+end #crackDoor()
 
 ########################################################
 
@@ -535,6 +553,18 @@ var conDoor = Connect(doorName)
         conID.SaveMemory(key_name,doorCode)
         return true
     end
+end
+
+array getStoredDoorNames()
+    array storedDoorNames = []
+    string code = "!d_"
+    var memKeys = GetMemories()
+    loop doorName in memKeys
+        if hasPrefix(doorName,code)
+            Append(storedDoorNames,removePrefix(doorName,3))
+        end
+    end
+    return storedDoorNames
 end
 
 void listDoors()
