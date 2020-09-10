@@ -1,7 +1,7 @@
 string gcServer = "HanksSteeringComputer"
 
 
-#loadConnections()
+loadConnections()
 
 os()
 
@@ -138,6 +138,22 @@ end
 
 string getDoorDestination()
     return LoadMemory('doorDestination')
+end
+
+
+string getPortalDoor()
+    return LoadMemory('doorPortal')
+end
+
+
+string togglePortalDoor()
+    var portal = LoadMemory('doorPortal')
+    if portal == 'true'
+        SaveMemory('doorPortal','false')
+    else
+        SaveMemory('doorPortal','true')
+    end
+    return LoadMemory('doorPortal')
 end
 
 
@@ -706,7 +722,7 @@ void SlurpUI()
         # Show list of computer nicknames
         loop Range(0, maxIndex)
             PrintS(@ + '-' + compData[@*2] + '  ')
-            if Mod(@, 5) == 4 or @ == maxIndex
+            if Mod(@, 4) == 3 or @ == maxIndex
                 Print(" ")
             end
         end
@@ -821,6 +837,10 @@ void findNearby()
             else
                 Print("Computer name is in the sel memory key")
             end #if fly
+    else if find.GetTypeOfThing(sel) == "door"
+        SaveMemory('doorDestination',sel)
+        storeDoor(sel,'?')
+        Print("Door Name is in the doorDestination key")
     end #selected a computer
     #selected object name stored in "sel" key
         #if sel key contains a computer name,
@@ -951,6 +971,6 @@ storeComputer("LargeComputer", "LargeComputerL3_LargeComputerL3")
 storeComputer("Hotel_Server_Basement", "Hotel_ServerBasement_LargeComputerL3_LargeComputerL3_1")
 storeComputer("Factory_ServerRoom", "Factory_ServerRoom_LargeComputerL3_LargeComputerL3_1")
 storeComputer("Franks_Sink","Frank_Room_Poor_WaterTap_Poor_WaterTap_1")
-#Connect("Seaschack1_LargeComputerL3_LargeComputerL3_1")
+Connect("Seaschack1_LargeComputerL3_LargeComputerL3_1")
 
 end
