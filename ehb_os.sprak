@@ -531,7 +531,6 @@ var DisplayArray(array list, number linesPerRecord)
 end #DisplayArray(array list, number linesPerRecord)
 
 
-# stringDelimiter
 array stringDelimiter(string cmd,string delimiter)
 #Should take a string of delimiter separated elements and
 #output elemements as an array.
@@ -540,8 +539,29 @@ array stringDelimiter(string cmd,string delimiter)
 #The first element coudl be used as the command,
 #then Remove could extract the first element of the array
 #and the rest could be passed to a function as the argument.
-
+    bool lastCharWasDelimiter = false
+    number outputIndex = 0
+    array outputArray = []
+    string thisWord = ''
+    number length = Count(cmd)
+    loop char in cmd
+        if char != delimiter
+            lastCharWasDelimiter = false
+            thisWord = thisWord + char
+            #Append(thisWord,char)
+        else
+            if !lastCharWasDelimiter
+                Append(outputArray,thisWord)
+                thisWord = ''
+                outputIndex++
+            end
+            lastCharWasDelimiter = true
+        end
+    end
+    Append(outputArray,thisWord)
+    return outputArray
 end #stringDelimiter()
+
 
 
 ##########################################
@@ -956,9 +976,14 @@ end #findAll()
 #########################################
 
 
-
-
-
+# Command Parser
+# Are arrays of arrays possible?
+array parseCommand(commandString)
+#Output will begin with command name, then -options, then arguments
+#Simply split with spaces as a delimiter
+    array commandArray stringDelimiter(commandString,' ')
+    return commandArray
+    #array testArray = [[], [], []]
 void loadConnections()
 #slurpLocations
 
