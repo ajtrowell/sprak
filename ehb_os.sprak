@@ -973,17 +973,39 @@ void findAll()
 end #findAll()
 
 
-#########################################
 
+#GetPeople()
+#GetThingsOfType( type )
+#GetPosition( name )
+#GetAction( name )
+#GetRoom( name )
+#GetThingsInRoom( roomName )
+#GetThingsOfType( type )
+#GetAllRooms()
+#GetTypeOfThing( name )
+
+# function with command line arguments
+void find(string commandString)
+    array cmdArray = parseCommand(commandString) 
+
+
+end
+
+#########################################
 
 # Command Parser
 # Are arrays of arrays possible?
-array parseCommand(commandString)
+array parseCommand(string commandString)
 #Output will begin with command name, then -options, then arguments
 #Simply split with spaces as a delimiter
-    array commandArray stringDelimiter(commandString,' ')
+    array commandArray = stringDelimiter(commandString,' ')
     return commandArray
-    #array testArray = [[], [], []]
+end
+
+
+##########################################
+
+
 void loadConnections()
 #slurpLocations
 
@@ -996,6 +1018,6 @@ storeComputer("LargeComputer", "LargeComputerL3_LargeComputerL3")
 storeComputer("Hotel_Server_Basement", "Hotel_ServerBasement_LargeComputerL3_LargeComputerL3_1")
 storeComputer("Factory_ServerRoom", "Factory_ServerRoom_LargeComputerL3_LargeComputerL3_1")
 storeComputer("Franks_Sink","Frank_Room_Poor_WaterTap_Poor_WaterTap_1")
-Connect("Seaschack1_LargeComputerL3_LargeComputerL3_1")
+#Connect("Seaschack1_LargeComputerL3_LargeComputerL3_1")
 
 end
