@@ -14,19 +14,25 @@ os()
 void os()
     ClearText()
     PlaySound("Coin 1")
-   loop
-       string cmdString = Input("> ")
-       #array cmdArray = parseCommand(cmdString)
-       array cmdArray = stringDelimiter(cmdString,' ')
-       Print('Menu Parse Debug: ' + cmdArray)
-       string cmd = cmdArray[0]
-       Print('Menu Cmd: ' + cmd)
-       if cmd == 'help' or cmd == 'h'
-           Print('find, find help or find -h for help')
-       else if cmd == 'find'
-           find(cmdString)           
-   else
-       Print('Command not recognized. Type help if needed')
+    loop
+        string cmdString = Input("> ")
+        #array cmdArray = parseCommand(cmdString)
+        array cmdArray = stringDelimiter(cmdString,' ')
+        Print('Menu Parse Debug: ' + cmdArray)
+        string cmd = cmdArray[0]
+        Print('Menu Cmd: ' + cmd)
+        if cmd == 'help' or cmd == 'h'
+            Print('find, find help or find -h for help')
+            Print('setup, sets up the screen size')
+            Print('browse, browse -h, view memory')
+        else if cmd == 'find'
+            find(cmdString)  
+        else if cmd == 'setup'
+            setup(cmdString)
+        else if cmd == 'browse'
+            browse(cmdString)
+        else
+            Print('Command not recognized. Type help if needed')
         end 
     
    end
@@ -70,6 +76,42 @@ void find(string command)
 
 end
 
+
+####
+var browse(string command)
+    return 0
+end
+
+
+void setup(string command)
+    loop Range(40,2)
+        Print(@)
+    end
+    number maxRows = Input('1  Max number visible: ')
+    SaveMemory('screenRows',maxRows) 
+
+    loop try in [1,2]    
+        loop x in [1,2,3,4,5,6,7]
+
+            loop Range(1,10)
+               if(@ == 10 || try == 1)
+                  if (try == 1)
+
+                      PrintS(x - 1)
+                  else
+                      PrintS(x)
+                  end
+               else 
+                 PrintS(@)
+               end 
+          end 
+       end
+       Print("")
+    end
+    number maxCols = Input('Max number visible: ')
+    SaveMemory('screenCols',maxCols)
+    return 0
+end
 
 
 # Command Parser

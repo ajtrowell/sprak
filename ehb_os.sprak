@@ -18,9 +18,13 @@ Print("General Public License v3.0")
 Bar()
 
 loop
-    string cmd = Input("> ")
+    string cmdString = Input("> ")
+    array cmdArray = stringDelimiter(cmdString,' ')
+    string cmd = cmdArray[0]
     string dir = "root"
     number id = -1
+    #Print('Menu Parse Debug: ' + cmdArray)
+
 
     if cmd == "cd"
         Print("ROOT")
@@ -38,7 +42,7 @@ loop
         Print(" - encrypt")        
         Print(" - info")        
         Print(" - clear")
-        Print(" - find(2) - Find entities")
+        Print(" - find -h, find1, find2 - Find entities")
         Print(" - floppy")                
         Print(" - slurp [now]")                
     else if cmd == "connect"
@@ -87,9 +91,11 @@ loop
         Info()  
     else if cmd == "clear"
         ClearText()
-     else if cmd == "find"
+    else if cmd == "find"
+        find(cmdString)
+    else if cmd == "find1"
         findUI()
-     else if cmd == "find2"
+    else if cmd == "find2"
         findNearby()
     else if cmd == "floppy"
         BootFromFloppy()
@@ -985,12 +991,27 @@ end #findAll()
 #GetTypeOfThing( name )
 
 # function with command line arguments
-void find(string commandString)
-    array cmdArray = parseCommand(commandString) 
-
+void find(string command)
+    string gcFindServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
+    var find = Connect(gcFindServer)
+    
+    array cmdArray = stringDelimiter(command,' ')
+    Print('FIND CLI ' + cmdArray)
+    #need an option
+    if cmdArray[1] == 'help' or cmdArray[1] == '-h'
+        Print('find [-h] or find -person <personName>')
+        Print('find -objectWith <personName>')
+        Print('find -objectIn <roomName>')
+        Print('find -type <objectType>')
+        Print('find -room <roomName>')
+        Print('Eg find -person Pixie')
+        Print('Stores room to @r, person to @p, ...')
+        Print('computer to @c, door to @d, ...')
+        Print('location to @l, object to @o, ...')
+        Print('type to @t')
+    end
 
 end
-
 #########################################
 
 # Command Parser
