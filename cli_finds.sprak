@@ -125,7 +125,19 @@ loop
     Print('Selected Entry:')
     Print(selectedKey)
     Print(h.LoadMemory(selectedKey))
-
+    Print('Desired Action on memory')
+    PrintS('(Q)uit (D)elete (R)ename (C)opy ')
+    Print('(S)lurp (D)oor')
+    string cmd = Input('Command> ')
+    if cmd == 'Q'
+    else if cmd == 'D'
+        h.EraseMemory(selectedKey)
+    else if cmd == 'R'
+        string newKeyName = Input('New Key Name: ')
+        h.SaveMemory(newKeyName,h.LoadMemory(selectedKey))
+        h.EraseMemory(selectedKey)
+    else if cmd == 'C'
+    end
 
     return 0
 end
