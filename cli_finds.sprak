@@ -79,7 +79,69 @@ end
 
 ####
 var browse(string command)
+    # Could either scroll line by line or
+    # page by page
+    # Lets try line by line (harder)
+
+    if(!HasMemory('screenRows'))
+        setup('commandGoesHere')
+    
+    end   
+    number screenRows = LoadMemory('screenRows')
+        
+   
+    Print('Screen Rows: ' + screenRows)
+
+    array memoryKeys = h.GetMemories()
+    number totalKeys = Count(memoryKeys)
+    Print('TotalKeys: ' + totalKeys)
+    number lastKeyIndex = (totalKeys - 1)
+    number iCursor = 0
+
+    # Buffer is indexing into the keys, starts with 0
+    number bufferStart = 0
+    number bufferStop = screenRows - 1
+    if bufferStop > lastKeyIndex
+        bufferStop = lastKeyIndex
+    end
+    bufferStop-- # Make room for cmd line
+
+
+    displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+
+loop
+    if IsKeyPressed('down')
+        iCursor++
+        displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+    else if IsKeyPressed('up')
+        iCursor--
+        displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+    else if IsKeyPressed('space')
+        break
+    end 
+   end
+    string selectedKey = memoryKeys[iCursor]
+   
+    Print('Selected Entry:')
+    Print(selectedKey)
+    Print(h.LoadMemory(selectedKey))
+
+
     return 0
+end
+
+
+void displayBuffer(number start, number stop, array values,number iCursor)
+    loop Range(start,stop)
+        if @ == iCursor
+            PrintS('>')
+        else
+            PrintS(' ')
+        end
+        PrintS(@ + '-')
+        Print(values[@])
+    end
+    
 end
 
 
