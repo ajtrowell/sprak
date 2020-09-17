@@ -25,12 +25,15 @@ void os()
             Print('find, find help or find -h for help')
             Print('setup, sets up the screen size')
             Print('browse, browse -h, view memory')
+            Print('info, show system information')
         else if cmd == 'find'
             find(cmdString)  
         else if cmd == 'setup'
             setup(cmdString)
         else if cmd == 'browse'
             browse(cmdString)
+        else if cmd == 'info'
+            Info()
         else
             Print('Command not recognized. Type help if needed')
         end 
@@ -59,9 +62,10 @@ void find(string command)
     var find = Connect(gcFindServer)
     
     array cmdArray = stringDelimiter(command,' ')
+    number cmdSize = Count(cmdArray)
     Print('FIND CLI ' + cmdArray)
     #need an option
-    if cmdArray[1] == 'help' or cmdArray[1] == '-h'
+    if cmdSize <= 1 or cmdArray[1] == '-h' or cmdArray[1] == 'help'
         Print('find [-h] or find -person <personName>')
         Print('find -objectWith <personName>')
         Print('find -objectIn <roomName>')
@@ -72,6 +76,8 @@ void find(string command)
         Print('computer to @c, door to @d, ...')
         Print('location to @l, object to @o, ...')
         Print('type to @t')
+    else
+        Print('Unidentified command.  Try find -h to for help.')
     end
 
 end
@@ -85,11 +91,8 @@ var browse(string command)
 
     if(!HasMemory('screenRows'))
         setup('commandGoesHere')
-    
     end   
-    number screenRows = LoadMemory('screenRows')
-        
-   
+    number screenRows = LoadMemory('screenRows')        
     Print('Screen Rows: ' + screenRows)
 
     array memoryKeys = h.GetMemories()
@@ -106,20 +109,19 @@ var browse(string command)
     end
     bufferStop-- # Make room for cmd line
 
-
     displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
-
-loop
-    if IsKeyPressed('down')
-        iCursor++
-        displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
-    else if IsKeyPressed('up')
-        iCursor--
-        displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
-    else if IsKeyPressed('space')
-        break
-    end 
-   end
+# Control movement with keys
+    loop
+        if IsKeyPressed('down')
+            iCursor++
+            displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+        else if IsKeyPressed('up')
+            iCursor--
+            displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+        else if IsKeyPressed('space')
+            break
+        end         
+    end
     string selectedKey = memoryKeys[iCursor]
    
     Print('Selected Entry:')
@@ -137,6 +139,12 @@ loop
         h.SaveMemory(newKeyName,h.LoadMemory(selectedKey))
         h.EraseMemory(selectedKey)
     else if cmd == 'C'
+        string newKeyName = Input('New Key Name: ')
+        h.SaveMemory(newKeyName,h.LoadMemory(selectedKey))
+    else if cmd == 'S'
+        var thisComputer = Connect(h.LoadMemory(selectedKey))
+        h.SaveMemory('@c',h.LoadMemory(selectedKey))
+        Slurp()
     end
 
     return 0
