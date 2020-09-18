@@ -26,18 +26,21 @@ void os()
             Print('setup, sets up the screen size')
             Print('browse, browse -h, view memory')
             Print('info, show system information')
+            Print('clear, clear screen')
         else if cmd == 'find'
-            find(cmdString)  
+            find(cmdString)
         else if cmd == 'setup'
             setup(cmdString)
         else if cmd == 'browse'
             browse(cmdString)
         else if cmd == 'info'
             Info()
+        else if cmd == 'clear'
+            ClearText()
         else
             Print('Command not recognized. Type help if needed')
-        end 
-    
+        end
+
    end
 end
 
@@ -60,12 +63,19 @@ end
 void find(string command)
     string gcFindServer = "PoliceOfficeInterior_MinistryOfficeWorkstationComputer_1"
     var find = Connect(gcFindServer)
-    
+
     array cmdArray = stringDelimiter(command,' ')
     number cmdSize = Count(cmdArray)
     Print('FIND CLI ' + cmdArray)
-    #need an option
-    if cmdSize <= 1 or cmdArray[1] == '-h' or cmdArray[1] == 'help'
+#DEBUG
+    #Show help if no option is given, or option is -h or help
+    bool showHelp = false
+    if cmdSize<=1
+        showHelp = true
+    else if cmdArray[1] == '-h' or cmdArray[1] == 'help'
+        showHelp = true
+    end
+    if showHelp == true
         Print('find [-h] or find -person <personName>')
         Print('find -objectWith <personName>')
         Print('find -objectIn <roomName>')
@@ -91,8 +101,8 @@ var browse(string command)
 
     if(!HasMemory('screenRows'))
         setup('commandGoesHere')
-    end   
-    number screenRows = LoadMemory('screenRows')        
+    end
+    number screenRows = LoadMemory('screenRows')
     Print('Screen Rows: ' + screenRows)
 
     array memoryKeys = h.GetMemories()
@@ -107,24 +117,72 @@ var browse(string command)
     if bufferStop > lastKeyIndex
         bufferStop = lastKeyIndex
     end
-    bufferStop-- # Make room for cmd line
+    bufferStop = bufferStop - 5 # Make room for cmd line
 
     displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
 # Control movement with keys
+    number cursorShift = 0
+    number bufferShift = 0
+    number iPrint = 0 # Fancy debuggin
     loop
+        bool keyPressed = false # Initial assumption
         if IsKeyPressed('down')
-            iCursor++
-            displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+            cursorShift = 1
+            keyPressed = true
+            
         else if IsKeyPressed('up')
-            iCursor--
-            displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+            cursorShift = -1
+            keyPressed = true
+        else if IsKeyPressed('right')
+            cursorShift = 10
+            keyPressed = true
+        else if IsKeyPressed('left')
+            cursorShift = -10
+            keyPressed = true
         else if IsKeyPressed('space')
-            break
-        end         
+                break
+        end
+            
+        if keyPressed
+            # Logic to prevent running past end of array
+            number arrayEndGap = lastKeyIndex - iCursor
+            number arrayStartGap = 0 - iCursor
+            if (cursorShift <  arrayStartGap)
+                cursorShift = arrayStartGap
+            end
+            if (cursorShift >  arrayEndGap )
+                cursorShift = arrayEndGap
+            end
+            # New iCursor position, within array bounds
+            iCursor = iCursor + cursorShift
+            # Logic to shift buffer by correct amount
+            # should only shift when our iCursor extends beyond buffer bounds
+            if (iCursor > bufferStop)
+                bufferShift = iCursor - bufferStop
+            else if (iCursor < bufferStart)
+                bufferShift = iCursor - bufferStart
+            else
+                bufferShift = 0
+            end
+            bufferStart = bufferStart + bufferShift
+            bufferStop  = bufferStop  + bufferShift
+            #Debug Output
+
+            if iPrint >=5
+                iPrint = 0
+            else
+                iPrint ++
+            end
+            Text(20,iPrint,'cursorShift' + cursorShift)
+            #Text(20,iPrint,'testtesttesttesttesttesttesttest')
+            DisplayGraphics()
+            displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+        end # if keyPressed
     end
+# loop
     string selectedKey = memoryKeys[iCursor]
-   
-    Print('Selected Entry:')
+
+    PrintS('Selected Entry:  ')
     Print(selectedKey)
     Print(h.LoadMemory(selectedKey))
     Print('Desired Action on memory')
@@ -152,6 +210,7 @@ end
 
 
 void displayBuffer(number start, number stop, array values,number iCursor)
+    ClearText()
     loop Range(start,stop)
         if @ == iCursor
             PrintS('>')
@@ -161,7 +220,7 @@ void displayBuffer(number start, number stop, array values,number iCursor)
         PrintS(@ + '-')
         Print(values[@])
     end
-    
+
 end
 
 
@@ -170,9 +229,9 @@ void setup(string command)
         Print(@)
     end
     number maxRows = Input('1  Max number visible: ')
-    SaveMemory('screenRows',maxRows) 
+    SaveMemory('screenRows',maxRows)
 
-    loop try in [1,2]    
+    loop try in [1,2]
         loop x in [1,2,3,4,5,6,7]
 
             loop Range(1,10)
@@ -183,10 +242,10 @@ void setup(string command)
                   else
                       PrintS(x)
                   end
-               else 
+               else
                  PrintS(@)
-               end 
-          end 
+               end
+          end
        end
        Print("")
     end
@@ -212,8 +271,8 @@ string substring(inString,start_index,stop_index)
         stop_index = Count(inString) - 1
     end
 
-    #Error Checking 
-    
+    #Error Checking
+
     if (start_index >= stop_index)
         Print("ERROR: start_index >= stop_index!")
         break
@@ -278,7 +337,7 @@ var DisplayArray(array list, number linesPerRecord)
     bool continueLoop = true #use to escape loopRecords
     #loop x from 0 to maxRecordIndex
     loop #do-until(continueLoop == false)
-        
+
         PrintS(x +" - ") #Numer the records starting from 0
         loop lineIndex from 0 to maxLineIndex
             Print(list[x*linesPerRecord + lineIndex])
@@ -291,14 +350,14 @@ var DisplayArray(array list, number linesPerRecord)
                 if x>0
                     x--
                 end
-                Sleep(loopDelay)                
+                Sleep(loopDelay)
                 break
             else if IsKeyPressed("down")
                 #Error Check
                 if x<maxRecordIndex
                     x++
                 end
-                Sleep(loopDelay)                
+                Sleep(loopDelay)
                 break
             else if IsKeyPressed("space")
                 continueLoop = false
@@ -311,7 +370,7 @@ var DisplayArray(array list, number linesPerRecord)
             SaveMemory("sel",list[x*linesPerRecord + maxLineIndex]) #grab last line
             return list[x*linesPerRecord + maxLineIndex]
             break
-        end #if/loop    
+        end #if/loop
     end #loopRecords - do-until(continueLoop == false)
 
 end #DisplayArray(array list, number linesPerRecord)
