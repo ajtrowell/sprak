@@ -68,15 +68,24 @@ void find(string command)
     number cmdSize = Count(cmdArray)
     Print('FIND CLI ' + cmdArray)
 #DEBUG
+    string findOption = 'showHelp' #Default
     #Show help if no option is given, or option is -h or help
-    bool showHelp = false
     if cmdSize<=1
-        showHelp = true
+        findOption = 'showHelp'
     else if cmdArray[1] == '-h' or cmdArray[1] == 'help'
-        showHelp = true
+        findOption = 'showHelp'
+    else if cmdSize > 1 and cmdArray[1] == '-person'
+        findOption = 'findAllPeople'
+    else if cmdSize > 2
+        if cmdArray[1] == '-person' and cmdArray[2] == 'all'
+            findOption = 'findAllPeople'
+        end
     end
-    if showHelp == true
-        Print('find [-h] or find -person <personName>')
+
+    if findOption == 'showHelp'
+        Print('find -h for this help screen ')
+        Print('find -person all / View all people')
+        Print('find -person <personName>')
         Print('find -objectWith <personName>')
         Print('find -objectIn <roomName>')
         Print('find -type <objectType>')
@@ -86,6 +95,13 @@ void find(string command)
         Print('computer to @c, door to @d, ...')
         Print('location to @l, object to @o, ...')
         Print('type to @t')
+    else if findOption == 'findAllPeople'
+        Print('find all people')
+        array allPeople = find.GetPeople()
+        loop person in allPeople
+            Print(person)
+        end
+        #var sel = DisplayArray(allPeople,1)
     else
         Print('Unidentified command.  Try find -h to for help.')
     end
@@ -95,9 +111,7 @@ end
 
 ####
 var browse(string command)
-    # Could either scroll line by line or
-    # page by page
-    # Lets try line by line (harder)
+    # Scroll Line by Line
 
     if(!HasMemory('screenRows'))
         setup('commandGoesHere')
@@ -129,7 +143,7 @@ var browse(string command)
         if IsKeyPressed('down')
             cursorShift = 1
             keyPressed = true
-            
+
         else if IsKeyPressed('up')
             cursorShift = -1
             keyPressed = true
@@ -142,7 +156,7 @@ var browse(string command)
         else if IsKeyPressed('space')
                 break
         end
-            
+
         if keyPressed
             # Logic to prevent running past end of array
             number arrayEndGap = lastKeyIndex - iCursor
