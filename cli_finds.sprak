@@ -30,9 +30,9 @@ void os()
         else if cmd == 'find'
             find(cmdString)
         else if cmd == 'setup'
-            setup(cmdString)
+            setupScreenSize(cmdString)
         else if cmd == 'browse'
-            browse(cmdString)
+            browseMemory()
         else if cmd == 'info'
             Info()
         else if cmd == 'clear'
@@ -110,18 +110,55 @@ end
 
 
 ####
-var browse(string command)
+void browseMemory()
+    # Use browseArray() to view all memory
+
+    number indexSelection =  -1
+    array memoryKeys = h.GetMemories()
+    indexSelection = browseArray(memoryKeys)
+
+    string selectedKey = memoryKeys[indexSelection]
+
+    PrintS('Selected Entry:  ')
+    Print(selectedKey)
+    Print(h.LoadMemory(selectedKey))
+    Print('Desired Action on memory')
+    PrintS('(Q)uit (D)elete (R)ename (C)opy ')
+    Print('(S)lurp (D)oor')
+    string cmd = Input('Command> ')
+    if cmd == 'Q'
+    else if cmd == 'D'
+        h.EraseMemory(selectedKey)
+    else if cmd == 'R'
+        string newKeyName = Input('New Key Name: ')
+        h.SaveMemory(newKeyName,h.LoadMemory(selectedKey))
+        h.EraseMemory(selectedKey)
+    else if cmd == 'C'
+        string newKeyName = Input('New Key Name: ')
+        h.SaveMemory(newKeyName,h.LoadMemory(selectedKey))
+    else if cmd == 'S'
+        var thisComputer = Connect(h.LoadMemory(selectedKey))
+        h.SaveMemory('@c',h.LoadMemory(selectedKey))
+        Slurp()
+    end
+
+
+end
+
+
+number browseArray(array inputArray)
+# Input an array, allow scrolling through array, return selection index.
+    number indexSelection = -1 # invalid array selection
     # Scroll Line by Line
 
     if(!HasMemory('screenRows'))
-        setup('commandGoesHere')
+        setupScreenSize('commandGoesHere')
     end
     number screenRows = LoadMemory('screenRows')
     Print('Screen Rows: ' + screenRows)
 
-    array memoryKeys = h.GetMemories()
-    number totalKeys = Count(memoryKeys)
-    Print('TotalKeys: ' + totalKeys)
+    number totalKeys = Count(inputArray)
+    Print('TotalKeys: ' + totalKeys) # DEBUG
     number lastKeyIndex = (totalKeys - 1)
     number iCursor = 0
 
@@ -133,7 +170,7 @@ var browse(string command)
     end
     bufferStop = bufferStop - 5 # Make room for cmd line
 
-    displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+    displayBuffer(bufferStart,bufferStop,inputArray,iCursor)
 # Control movement with keys
     number cursorShift = 0
     number bufferShift = 0
@@ -190,36 +227,13 @@ var browse(string command)
             Text(20,iPrint,'cursorShift' + cursorShift)
             #Text(20,iPrint,'testtesttesttesttesttesttesttest')
             DisplayGraphics()
-            displayBuffer(bufferStart,bufferStop,memoryKeys,iCursor)
+            displayBuffer(bufferStart,bufferStop,inputArray,iCursor)
         end # if keyPressed
     end
 # loop
-    string selectedKey = memoryKeys[iCursor]
 
-    PrintS('Selected Entry:  ')
-    Print(selectedKey)
-    Print(h.LoadMemory(selectedKey))
-    Print('Desired Action on memory')
-    PrintS('(Q)uit (D)elete (R)ename (C)opy ')
-    Print('(S)lurp (D)oor')
-    string cmd = Input('Command> ')
-    if cmd == 'Q'
-    else if cmd == 'D'
-        h.EraseMemory(selectedKey)
-    else if cmd == 'R'
-        string newKeyName = Input('New Key Name: ')
-        h.SaveMemory(newKeyName,h.LoadMemory(selectedKey))
-        h.EraseMemory(selectedKey)
-    else if cmd == 'C'
-        string newKeyName = Input('New Key Name: ')
-        h.SaveMemory(newKeyName,h.LoadMemory(selectedKey))
-    else if cmd == 'S'
-        var thisComputer = Connect(h.LoadMemory(selectedKey))
-        h.SaveMemory('@c',h.LoadMemory(selectedKey))
-        Slurp()
-    end
-
-    return 0
+    indexSelection = iCursor 
+    return indexSelection
 end
 
 
@@ -238,7 +252,7 @@ void displayBuffer(number start, number stop, array values,number iCursor)
 end
 
 
-void setup(string command)
+void setupScreenSize(string command)
     loop Range(40,2)
         Print(@)
     end
