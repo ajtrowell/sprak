@@ -111,14 +111,18 @@ end
 
 ####
 void browseMemory()
-    # Use browseArray() to view all memory
-
+    # Use browseArray() to view and manage memory entries
     number indexSelection =  -1
     array memoryKeys = h.GetMemories()
     indexSelection = browseArray(memoryKeys)
-
     string selectedKey = memoryKeys[indexSelection]
+    memoryKeyOptions(selectedKey)
 
+end
+
+bool memoryKeyOptions(string selectedKey)
+    # Provide options for acting on a memory key
+    # Depending on if it is a door, computer, etc
     PrintS('Selected Entry:  ')
     Print(selectedKey)
     Print(h.LoadMemory(selectedKey))
@@ -143,6 +147,7 @@ void browseMemory()
     end
 
 
+    return true
 end
 
 
@@ -174,7 +179,6 @@ number browseArray(array inputArray)
 # Control movement with keys
     number cursorShift = 0
     number bufferShift = 0
-    number iPrint = 0 # Fancy debuggin
     loop
         bool keyPressed = false # Initial assumption
         if IsKeyPressed('down')
@@ -217,16 +221,6 @@ number browseArray(array inputArray)
             end
             bufferStart = bufferStart + bufferShift
             bufferStop  = bufferStop  + bufferShift
-            #Debug Output
-
-            if iPrint >=5
-                iPrint = 0
-            else
-                iPrint ++
-            end
-            Text(20,iPrint,'cursorShift' + cursorShift)
-            #Text(20,iPrint,'testtesttesttesttesttesttesttest')
-            DisplayGraphics()
             displayBuffer(bufferStart,bufferStop,inputArray,iCursor)
         end # if keyPressed
     end
