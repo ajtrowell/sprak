@@ -18,9 +18,8 @@ void os()
         string cmdString = Input("> ")
         #array cmdArray = parseCommand(cmdString)
         array cmdArray = stringDelimiter(cmdString,' ')
-        Print('Menu Parse Debug: ' + cmdArray)
         string cmd = cmdArray[0]
-        Print('Menu Cmd: ' + cmd)
+        #Print('Menu Parse Debug: ' + cmdArray)
         if cmd == 'help' or cmd == 'h'
             Print('find, find help or find -h for help')
             Print('setup, sets up the screen size')
@@ -76,9 +75,14 @@ void find(string command)
         findOption = 'showHelp'
     else if cmdSize > 1 and cmdArray[1] == '-person'
         findOption = 'findAllPeople'
+    else if cmdSize > 1 and cmdArray[1] == '-room'
+        findOption = 'findAllRooms'
     else if cmdSize > 2
         if cmdArray[1] == '-person' and cmdArray[2] == 'all'
             findOption = 'findAllPeople'
+        end
+        if cmdArray[1] == '-room' and cmdArray[2] == 'all'
+            findOption = 'findAllRooms'
         end
     end
 
@@ -90,6 +94,7 @@ void find(string command)
         Print('find -objectIn <roomName>')
         Print('find -type <objectType>')
         Print('find -room <roomName>')
+        Print('find -room all')
         Print('Eg find -person Pixie')
         Print('Stores room to @r, person to @p, ...')
         Print('computer to @c, door to @d, ...')
@@ -99,7 +104,13 @@ void find(string command)
         Print('find all people')
         array allPeople = find.GetPeople()
         var sel = browseArray(allPeople)
-        h.SaveMemory('@p',sel)
+        h.SaveMemory('@p',allPeople[sel])
+        h.SaveMemory('sel',allPeople[sel])
+    else if findOption == 'findAllRooms'
+        array allRooms = find.GetAllRooms()
+        var sel = browseArray(allRooms)
+        h.SaveMemory('@r',allRooms[sel])
+        h.SaveMemory('sel',allRooms[sel])
     else
         Print('Unidentified command.  Try find -h to for help.')
     end
