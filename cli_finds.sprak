@@ -98,10 +98,8 @@ void find(string command)
     else if findOption == 'findAllPeople'
         Print('find all people')
         array allPeople = find.GetPeople()
-        loop person in allPeople
-            Print(person)
-        end
-        #var sel = DisplayArray(allPeople,1)
+        var sel = browseArray(allPeople)
+        h.SaveMemory('@p',sel)
     else
         Print('Unidentified command.  Try find -h to for help.')
     end
