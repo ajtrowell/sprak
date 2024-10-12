@@ -2,7 +2,7 @@
 SetMhz(500)
 SetMaxTime(-2)
 
-array apiList = ['internet','arcade','floopy','memory','door']
+array apiList = ['internet','arcade','floppy','memory','door']
 loop apiList
     EnableAPI(@)
 end

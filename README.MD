@@ -18,6 +18,10 @@
 
 - [Unlimited modifier at the beginning](https://steamcommunity.com/sharedfiles/filedetails/?id=528436484)
 
+- [Slurpie Program, DB](https://steamcommunity.com/app/400110/discussions/0/487870763300928645/)
+
+- [Teleporter 9000 - Computer in Inventory](https://steamcommunity.com/app/400110/discussions/0/1696048245844467007/)
+
   
 
 ### Other Repos
