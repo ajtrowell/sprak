@@ -263,23 +263,6 @@ end #BankUI()
 
 ##########################################
 
-void ShowThing()
-    Color(1,1,0)
-    Line(300,0,300,600)
-    DisplayGraphics()
-end
-
-number Circle(number radius)
-    return radius * radius * 31.4159
-end
-
-
-void CircleUI()
-   number radius = Input("Enter Circle Radius: ")
-   Print("Circle Area = " + Circle(radius)  ) 
-   Sleep(4)
-end
-
 void EncryptUI()
     ClearText()
     string s = Input("Enter key: ")
