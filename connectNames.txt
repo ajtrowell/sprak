@@ -1,0 +1,1 @@
+(h|find|thisComputer|id|bank|connection|conDoor|conID|conComp|find|selPC|compConnection|pc|slurpie|dest|c)\.

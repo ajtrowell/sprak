@@ -569,6 +569,132 @@ array stringDelimiter(string cmd,string delimiter)
 end #stringDelimiter()
 
 
+number browseArray(array inputArray)
+# Input an array, allow scrolling through array, return selection index.
+    number indexSelection = -1 # invalid array selection
+    # Scroll Line by Line
+
+    if(!HasMemory('screenRows'))
+        setupScreenSize('commandGoesHere')
+    end
+    number screenRows = LoadMemory('screenRows')
+    Print('Screen Rows: ' + screenRows)
+
+    number totalKeys = Count(inputArray)
+    Print('TotalKeys: ' + totalKeys) # DEBUG
+    number lastKeyIndex = (totalKeys - 1)
+    number iCursor = 0
+
+    # Buffer is indexing into the keys, starts with 0
+    number bufferStart = 0
+    number bufferStop = screenRows - 1
+    if bufferStop > lastKeyIndex
+        bufferStop = lastKeyIndex
+    end
+    bufferStop = bufferStop - 5 # Make room for cmd line
+
+    displayBuffer(bufferStart,bufferStop,inputArray,iCursor)
+# Control movement with keys
+    number cursorShift = 0
+    number bufferShift = 0
+    loop
+        bool keyPressed = false # Initial assumption
+        if IsKeyPressed('down')
+            cursorShift = 1
+            keyPressed = true
+
+        else if IsKeyPressed('up')
+            cursorShift = -1
+            keyPressed = true
+        else if IsKeyPressed('right')
+            cursorShift = 10
+            keyPressed = true
+        else if IsKeyPressed('left')
+            cursorShift = -10
+            keyPressed = true
+        else if IsKeyPressed('space')
+                break
+        end
+
+        if keyPressed
+            # Logic to prevent running past end of array
+            number arrayEndGap = lastKeyIndex - iCursor
+            number arrayStartGap = 0 - iCursor
+            if (cursorShift <  arrayStartGap)
+                cursorShift = arrayStartGap
+            end
+            if (cursorShift >  arrayEndGap )
+                cursorShift = arrayEndGap
+            end
+            # New iCursor position, within array bounds
+            iCursor = iCursor + cursorShift
+            # Logic to shift buffer by correct amount
+            # should only shift when our iCursor extends beyond buffer bounds
+            if (iCursor > bufferStop)
+                bufferShift = iCursor - bufferStop
+            else if (iCursor < bufferStart)
+                bufferShift = iCursor - bufferStart
+            else
+                bufferShift = 0
+            end
+            bufferStart = bufferStart + bufferShift
+            bufferStop  = bufferStop  + bufferShift
+            displayBuffer(bufferStart,bufferStop,inputArray,iCursor)
+        end # if keyPressed
+    end # loop
+    indexSelection = iCursor 
+    return indexSelection
+end
+
+
+void displayBuffer(number start, number stop, array values,number iCursor)
+    # Supports browseArray()
+    ClearText()
+    loop Range(start,stop)
+        if @ == iCursor
+            PrintS('>')
+        else
+            PrintS(' ')
+        end
+        PrintS(@ + '-')
+        Print(values[@])
+    end
+
+end
+
+
+void setupScreenSize(string command)
+    # Supports browseArray()
+    loop Range(40,2)
+        Print(@)
+    end
+    number maxRows = Input('1  Max number visible: ')
+    SaveMemory('screenRows',maxRows)
+
+    loop try in [1,2]
+        loop x in [1,2,3,4,5,6,7]
+
+            loop Range(1,10)
+               if(@ == 10 || try == 1)
+                  if (try == 1)
+
+                      PrintS(x - 1)
+                  else
+                      PrintS(x)
+                  end
+               else
+                 PrintS(@)
+               end
+          end
+       end
+       Print("")
+    end
+    number maxCols = Input('Max number visible: ')
+    SaveMemory('screenCols',maxCols)
+    return 0
+end
+
+
 
 ##########################################
 # Database Functions
@@ -828,6 +954,15 @@ void findNearby()
     #find person or object
     Print("Enter Name to Find: ")
     var name  = Input(">")
+    # Option to list all Names
+    if Count(name) == 0
+        array allPeople = find.GetPeople()
+        var sel = browseArray(allPeople)
+        name = allPeople[sel]
+        SaveMemory('@p',name)
+        SaveMemory('sel',name)
+    end
+
     var location = find.GetRoom(name)
     var action = find.GetAction(name)
     Print("Name: " + name)
@@ -847,14 +982,18 @@ void findNearby()
     #Print(types)
     #Take Input on which object type to list
     #var selType = Input(">")
-    var selType = DisplayArray(types,1)
+    number iType = browseArray(types)
+    var selType = types[iType]
+    # trash var selType = DisplayArray(types,1)
     #List all objects in room of specified type
         #use fancy menu,allows selection
         #eg DisplayArray(array list,number linesPerRercord)
     array thingsOfType = GetThingsInRoomOfType(location,selType)
     Print("Filtered list goes here...")
     #Print(thingsOfType)
-    var sel = DisplayArray(thingsOfType,1)
+    number iThing = browseArray(thingsOfType)
+    var sel = thingsOfType[iThing]
+    # trash var sel = DisplayArray(thingsOfType,1)
     if find.GetTypeOfThing(sel) == "computer"
         var selPC = Connect(sel) #Create connection to this computer
         var fly = Input("Do you want to slurp to this computer?")
